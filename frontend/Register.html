@@ -70,38 +70,15 @@
     </div>
     
     <script src="../js/script.js"></script>
-    <script>
-        // API Base URL
-        const API_BASE_URL = 'https://trackmytrash.onrender.com';
-        
-        // Load areas from database
-        async function loadAreas() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/routes/areas`);
-                const data = await response.json();
-                
-                const select = document.getElementById('barangay');
-                select.innerHTML = '<option value="" disabled selected>Select your area</option>';
-                
-                if (data.success && data.areas && data.areas.length > 0) {
-                    data.areas.forEach(area => {
-                        const option = document.createElement('option');
-                        option.value = area;
-                        option.textContent = area;
-                        select.appendChild(option);
-                    });
-                } else {
-                    select.innerHTML = '<option value="" disabled selected>No areas available</option>';
-                }
-            } catch(error) {
-                console.error('Failed to load areas:', error);
-                const select = document.getElementById('barangay');
-                select.innerHTML = '<option value="" disabled selected>Error loading areas</option>';
-            }
-        }
-        
-        // Load areas when page loads
-        loadAreas();
-    </script>
+  <script>
+    // API Base URL
+    const API_BASE_URL = 'https://trackmytrash.onrender.com';
+    
+    async function loadAreas() {
+        // ...
+    }
+    
+    loadAreas();
+</script>
 </body>
 </html>
