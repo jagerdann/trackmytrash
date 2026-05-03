@@ -37,23 +37,25 @@ import mysql.connector
 import re
 
 # Get DATABASE_URL from environment variable
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+
+# ========== DATABASE CONNECTION ==========
+import os
+import mysql.connector
+
+# Get database URL from environment
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if DATABASE_URL:
-    # Parse mysql://user:pass@host:port/database
-    match = re.match(r'mysql://([^:]+):([^@]+)@([^:]+):(\d+)/([^?]+)', DATABASE_URL)
-    if match:
-        db = mysql.connector.connect(
-            host=match.group(3),
-            port=int(match.group(4)),
-            user=match.group(1),
-            password=match.group(2),
-            database=match.group(5)
-        )
-        print("✅ Connected to Aiven MySQL via DATABASE_URL")
-    else:
-        print("❌ Invalid DATABASE_URL format")
-        db = None
+    # Parse the URL or use directly with environment variables
+    db = mysql.connector.connect(
+        host=os.environ.get('DB_HOST', 'mysql-1cd8a8a3-trackmytrash.l.aivencloud.com'),
+        port=int(os.environ.get('DB_PORT', 13351)),
+        user=os.environ.get('DB_USER', 'avnadmin'),
+        password=os.environ.get('DB_PASSWORD', ''),
+        database=os.environ.get('DB_NAME', 'defaultdb')
+    )
+    print("✅ Connected to Aiven MySQL via environment variables")
 else:
     # Local development
     db = mysql.connector.connect(
