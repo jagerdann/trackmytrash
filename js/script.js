@@ -168,6 +168,30 @@ async function checkAdminSession() {
     }
 }
 
+// Load areas for registration
+async function loadAreas() {
+    const API_BASE_URL = 'https://trackmytrash.onrender.com';
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/routes/areas`);
+        const data = await response.json();
+        const select = document.getElementById('barangay');
+        
+        if (select) {
+            select.innerHTML = '<option value="" disabled selected>Select your area</option>';
+            if (data.success && data.areas) {
+                data.areas.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area;
+                    option.textContent = area;
+                    select.appendChild(option);
+                });
+            }
+        }
+    } catch(error) {
+        console.error('Failed to load areas:', error);
+    }
+}
+
 // ========== SCHEDULE DATA (from database) ==========
 let baseSchedules = [];
 let daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
