@@ -545,6 +545,72 @@ async function checkHomePageRedirect() {
 // Call this when page loads
 checkHomePageRedirect();
 
+// Ito ang magsa-save ng install prompt para magamit natin manually
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Pigilan ang default na prompt para hindi agad lumabas
+  e.preventDefault();
+  // I-save ang event para magamit natin later
+  deferredPrompt = e;
+  
+  // DITO NIYO I-DISPLAY ANG CUSTOM BANNER NIYO
+  // Halimbawa: gawing visible ang inyong install banner div
+  showInstallBanner(); 
+});
+
+// Function para ipakita ang custom banner (pwede niyong i-design)
+function showInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) {
+    banner.style.display = 'flex'; // ipakita ang banner
+  }
+}
+
+// Kapag pinindot ang "Install"
+const installBtn = document.getElementById('installBtn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      // Ipakita ang native na install prompt
+      deferredPrompt.prompt();
+      // Hintayin ang desisyon ng user
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response: ${outcome}`);
+      // I-reset ang prompt (magagamit lang isang beses)
+      deferredPrompt = null;
+    }
+    // Itago ang custom banner
+    hideInstallBanner();
+  });
+}
+
+// Kapag pinindot ang "Not Now" - itago ang banner at tandaan na ayaw niya
+const dismissBtn = document.getElementById('dismissBtn');
+if (dismissBtn) {
+  dismissBtn.addEventListener('click', () => {
+    hideInstallBanner();
+    // I-save sa localStorage na ayaw ng user para hindi na ulit lumabas (halimbawa, 7 araw)
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 7); // 7 days na hindi lalabas
+    localStorage.setItem('pwaInstallDismissed', expiryDate.toISOString());
+  });
+}
+
+function hideInstallBanner() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+// Sa simula, suriin kung ayaw na ng user para hindi na ipakita ang banner
+function checkIfDismissed() {
+  const dismissedUntil = localStorage.getItem('pwaInstallDismissed');
+  if (dismissedUntil && new Date(dismissedUntil) > new Date()) {
+    return true; // Ayaw pa niya, huwag ipakita
+  }
+  return false;
+}
+
 // ========== LOGOUT ==========
 async function logout() {
     try {
