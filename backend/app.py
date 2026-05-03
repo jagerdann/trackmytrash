@@ -499,9 +499,8 @@ def get_user_by_username(username):
         return jsonify({"success": True, "user": user})
     else:
         return jsonify({"success": False, "message": "User not found"})
-    
 
-    # ========== ADMIN FEEDBACKS ==========
+# ========== ADMIN FEEDBACKS ==========
 @app.route('/api/admin/feedbacks', methods=['GET'])
 def admin_get_feedbacks():
     if not session.get('admin_logged_in'):
@@ -511,25 +510,50 @@ def admin_get_feedbacks():
     feedbacks = cursor.fetchall()
     return jsonify({"success": True, "feedbacks": feedbacks})
 
+# ========== FIXED FEEDBACK ENDPOINT (with error handling) ==========
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
-    clear_cursor()
-    data = request.json
-    name = data.get('name')
-    email = data.get('email')
-    barangay = data.get('barangay')
-    feedback_type = data.get('feedback_type')
-    message = data.get('message')
-    
-    # PALITAN: 'feedback' → 'feedbacks' 👇
-    cursor.execute("""
-        INSERT INTO feedbacks (name, email, barangay, feedback_type, message) 
-        VALUES (%s, %s, %s, %s, %s)
-    """, (name, email, barangay, feedback_type, message))
-    db.commit()
-    
-    return jsonify({"success": True, "message": "Thank you for your feedback!"})
-
+    try:
+        clear_cursor()
+        data = request.json
+        
+        name = data.get('name')
+        email = data.get('email')
+        barangay = data.get('barangay')
+        feedback_type = data.get('feedback_type')
+        message = data.get('message')
+        
+        # Validate required fields
+        if not name or not email or not message:
+            return jsonify({
+                "success": False, 
+                "message": "Name, email, and message are required!"
+            })
+        
+        # Insert into database
+        cursor.execute("""
+            INSERT INTO feedbacks (name, email, barangay, feedback_type, message) 
+            VALUES (%s, %s, %s, %s, %s)
+        """, (name, email, barangay, feedback_type, message))
+        db.commit()
+        
+        return jsonify({
+            "success": True, 
+            "message": "Thank you for your feedback!"
+        })
+        
+    except mysql.connector.Error as db_error:
+        print(f"Database error: {db_error}")
+        return jsonify({
+            "success": False, 
+            "message": f"Database error: {str(db_error)}"
+        })
+    except Exception as e:
+        print(f"General error: {e}")
+        return jsonify({
+            "success": False, 
+            "message": f"Server error: {str(e)}"
+        })
 
 @app.route('/api/admin/feedbacks/<int:feedback_id>', methods=['DELETE'])
 def admin_delete_feedback(feedback_id):
@@ -539,7 +563,6 @@ def admin_delete_feedback(feedback_id):
     cursor.execute("DELETE FROM feedbacks WHERE id = %s", (feedback_id,))
     db.commit()
     return jsonify({"success": True, "message": "Feedback deleted successfully!"})
-
 
 @app.route('/api/test', methods=['GET'])
 def test():
