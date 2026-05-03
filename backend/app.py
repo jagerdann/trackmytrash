@@ -44,31 +44,34 @@ import os
 import mysql.connector
 
 # Get database URL from environment
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
+DB_HOST = os.environ.get('DB_HOST', 'localhost')
+DB_PORT = os.environ.get('DB_PORT', 3306)
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
+DB_NAME = os.environ.get('DB_NAME', 'trackmytrash')
 
-if DATABASE_URL:
-    # Parse the URL or use directly with environment variables
+# Always use environment variables in production
+if DB_HOST != 'localhost':
     db = mysql.connector.connect(
-        host=os.environ.get('DB_HOST', 'mysql-1cd8a8a3-trackmytrash.l.aivencloud.com'),
-        port=int(os.environ.get('DB_PORT', 13351)),
-        user=os.environ.get('DB_USER', 'avnadmin'),
-        password=os.environ.get('DB_PASSWORD', ''),
-        database=os.environ.get('DB_NAME', 'defaultdb')
+        host=DB_HOST,
+        port=int(DB_PORT),
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
     )
-    print("✅ Connected to Aiven MySQL via environment variables")
+    print(f"✅ Connected to database at {DB_HOST}")
 else:
     # Local development
     db = mysql.connector.connect(
-        host="localhost",
-        port="3306",
-        user="root",
-        password="",
-        database="trackmytrash"
+        host=DB_HOST,
+        port=int(DB_PORT),
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
     )
     print("✅ Connected to local MySQL")
 
 cursor = db.cursor(dictionary=True)
-
 # ========== SERVE FRONTEND FILES ==========
 frontend_path = os.path.join(PROJECT_ROOT, 'frontend')
 css_path = os.path.join(PROJECT_ROOT, 'css')
