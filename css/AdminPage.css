@@ -1,0 +1,631 @@
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    box-sizing: border-box;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    background-image: url('../img/bg_img.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Alfa Slab One', serif;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(14, 81, 37, 0.7),
+        rgba(106, 222, 107, 0.7),
+        rgba(194, 209, 157, 0.7)
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+#navbar {
+    width: 100%;
+    background: #fcf6db;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 10;
+}
+
+#logo {
+    width: 100px;
+    height: auto;
+    max-height: 80px;
+    object-fit: contain;
+}
+
+.hamburger {
+    display: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #0e5125;
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    z-index: 100;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#navbar a {
+    color: #0e5125;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.3em;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+#navbar a:hover {
+    background: #0e5125;
+    color: #6ade6b;
+}
+
+/* Admin Container */
+.admin-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+#adminTitle {
+    font-size: 3em;
+    text-align: center;
+    margin: 20px 0 10px;
+    padding: 20px;
+    color: #0e5125;
+    -webkit-text-stroke: 1px #231d1d;
+    text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+    font-family: 'Alfa Slab One', serif;
+    background: transparent;
+}
+
+#welcomeAdmin {
+    text-align: center;
+    color: #0e5125;
+    margin-bottom: 30px;
+    font-size: 1.5em;
+    -webkit-text-stroke: 0.5px #231d1d;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.section-header h2 {
+    color: #0e5125;
+    font-size: 1.8em;
+    -webkit-text-stroke: 0.5px #231d1d;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-add {
+    background: #0e5125;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-family: 'Alfa Slab One', serif;
+}
+
+.btn-add:hover {
+    background: #6ade6b;
+    color: #0e5125;
+    transform: translateY(-2px);
+}
+
+/* Table Styles */
+.table-container {
+    overflow-x: auto;
+    background: rgba(252, 246, 219, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid #0e5125;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Alfa Slab One', serif;
+}
+
+th {
+    background: #0e5125;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #c2d19d;
+    color: #0e5125;
+}
+
+tr:hover {
+    background: rgba(106, 222, 107, 0.15);
+}
+
+/* Button Styles */
+.btn-edit {
+    background: #ed8936;
+    color: white;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-edit:hover {
+    background: #dd6b20;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: #e53e3e;
+    color: white;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-delete:hover {
+    background: #c53030;
+    transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: rgba(252, 246, 219, 0.98);
+    border: 3px solid #0e5125;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: #0e5125;
+    padding: 15px 20px;
+    border-radius: 17px 17px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close:hover {
+    color: #6ade6b;
+}
+
+.modal-content form {
+    padding: 25px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #0e5125;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #c2d19d;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-group input:focus {
+    border-color: #0e5125;
+    outline: none;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-save {
+    background: #0e5125;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    flex: 1;
+    transition: all 0.3s;
+}
+
+.btn-save:hover {
+    background: #6ade6b;
+    color: #0e5125;
+}
+
+.btn-cancel {
+    background: #e53e3e;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    flex: 1;
+    transition: all 0.3s;
+}
+
+.btn-cancel:hover {
+    background: #c53030;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #fcf6db;
+        flex-direction: column;
+        gap: 20px;
+        padding: 80px 20px 20px 20px;
+        transition: right 0.3s ease;
+        z-index: 999;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+        display: flex;
+    }
+    
+    .nav-links.show {
+        right: 0;
+    }
+    
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+    }
+    
+    #navbar {
+        height: auto;
+        padding: 12px 15px;
+    }
+    
+    #logo {
+        width: 80px;
+    }
+    
+    #adminTitle {
+        font-size: 2em;
+        padding: 10px;
+    }
+    
+    #welcomeAdmin {
+        font-size: 1.2em;
+    }
+    
+    .section-header h2 {
+        font-size: 1.3em;
+    }
+    
+    .btn-add {
+        padding: 8px 15px;
+        font-size: 0.9em;
+    }
+    
+    th, td {
+        padding: 8px;
+        font-size: 0.85em;
+    }
+    
+    .btn-edit, .btn-delete {
+        padding: 4px 10px;
+        font-size: 0.75em;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    #navbar {
+        justify-content: flex-start !important;
+        gap: 30px !important;
+    }
+    
+    .hamburger {
+        display: none !important;
+    }
+    
+    .nav-links {
+        position: static !important;
+        background: transparent !important;
+        flex-direction: row !important;
+        display: flex !important;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    #adminTitle {
+        font-size: 1.5em;
+    }
+    
+    #welcomeAdmin {
+        font-size: 1em;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .section-header h2 {
+        text-align: center;
+    }
+    
+    .table-container {
+        padding: 10px;
+    }
+    
+    th, td {
+        padding: 6px;
+        font-size: 0.75em;
+    }
+}
+
+/* Very Small */
+@media (max-width: 375px) {
+    #logo {
+        height: 30px;
+        width: auto;
+    }
+    
+    .hamburger {
+        font-size: 24px;
+    }
+    
+    #adminTitle {
+        font-size: 1.2em;
+    }
+}
+
+/* FIX FOR ADMIN MODAL - AYUSIN ANG FORM BOX SIZE */
+.modal-content {
+    max-width: 550px;
+    width: 90%;
+    max-height: 85vh;
+}
+
+.modal-content form {
+    padding: 20px 25px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.modal-header h3 {
+    font-size: 1.3em;
+}
+
+.form-buttons {
+    margin-top: 15px;
+}
+
+.btn-save, .btn-cancel {
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+/* Para sa file input */
+.form-group input[type="file"] {
+    padding: 6px;
+    font-size: 12px;
+}
+
+#imagePreview img {
+    max-width: 100%;
+    max-height: 120px;
+}
+
+/* Para sa dropdown select */
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #c2d19d;
+    border-radius: 10px;
+    background: white;
+    font-family: 'Alfa Slab One', serif;
+    font-size: 13px;
+    color: #0e5125;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-content form {
+        padding: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    .form-group label {
+        font-size: 0.85em;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .form-buttons {
+        gap: 8px;
+    }
+    
+    .btn-save, .btn-cancel {
+        padding: 6px 12px;
+        font-size: 0.85em;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .modal-content form {
+        padding: 12px;
+    }
+    
+    .form-group {
+        margin-bottom: 8px;
+    }
+    
+    .form-group label {
+        font-size: 0.8em;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+    
+    .btn-save, .btn-cancel {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+}

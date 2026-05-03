@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/AdminPage.css">
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+    <title>Admin Panel - Track My Trash</title>
+</head>
+<body onload="checkAdminSession()">
+
+    <div id="navbar">
+        <img src="../img/logo.png" alt="Logo" id="logo">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="nav-links" id="navLinks">
+            <a href="#" onclick="showSection('users')">Users</a>
+            <a href="#" onclick="showSection('routes')">Routes</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <h1 id="adminTitle">ADMIN PANEL</h1>
+        <h2 id="welcomeAdmin"></h2>
+
+        <!-- Users Section -->
+        <div id="usersSection" class="admin-section">
+            <div class="section-header">
+                <h2>MANAGE USERS</h2>
+                <button class="btn-add" onclick="showUserModal()">+ Add User</button>
+            </div>
+            <div class="table-container">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Barangay</th>
+                            <th>Contact</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="6">Loading users...<\/td>境
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Routes Section -->
+        <div id="routesSection" class="admin-section" style="display: none;">
+            <div class="section-header">
+                <h2>MANAGE ROUTES</h2>
+                <button class="btn-add" onclick="showRouteModal()">+ Add Route</button>
+            </div>
+            <div class="table-container">
+                <table id="routesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Stop No</th>
+                            <th>Area</th>
+                            <th>Landmark</th>
+                            <th>Arrival Time</th>
+                            <th>Duration</th>
+                            <th>Departure</th>
+                            <th>Barangay</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="routesTableBody">
+                        <tr><td colspan="10">Loading routes...<\/td>境
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Add User</h3>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="userUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" placeholder="Leave blank to keep current">
+                </div>
+                <div class="form-group">
+                    <label>Barangay</label>
+                    <input type="text" id="userBarangay">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" id="userContact">
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">Save</button>
+                    <button type="button" class="btn-cancel" onclick="closeUserModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Route Modal -->
+    <div id="routeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="routeModalTitle">Add Route</h3>
+                <span class="close" onclick="closeRouteModal()">&times;</span>
+            </div>
+            <form id="routeForm" enctype="multipart/form-data">
+                <input type="hidden" id="routeId">
+                <div class="form-group">
+                    <label>Stop No. (Auto-generated)</label>
+                    <input type="number" id="routeStopNo" required readonly style="background: #e8e8e8;">
+                </div>
+                <div class="form-group">
+                    <label>Area</label>
+                    <input type="text" id="routeArea" required>
+                </div>
+                <div class="form-group">
+                    <label>Landmark</label>
+                    <input type="text" id="routeLandmark">
+                </div>
+                <div class="form-group">
+                    <label>Arrival Time</label>
+                    <input type="text" id="routeArrivalTime" placeholder="e.g., 6:00 AM" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes)</label>
+                    <input type="number" id="routeDuration" placeholder="e.g., 25" required>
+                </div>
+                <div class="form-group">
+                    <label>Departure Time (Auto-calculated)</label>
+                    <input type="text" id="routeDepartureTime" readonly style="background: #e8e8e8;">
+                </div>
+                <div class="form-group">
+                    <label>Barangay</label>
+                    <input type="text" id="routeBarangay" required>
+                </div>
+                <div class="form-group">
+                    <label>Route Image <span style="color: red;">*</span></label>
+                    <input type="file" id="routeImageFile" accept="image/png, image/jpg, image/jpeg, image/gif">
+                    <small style="color: gray;">Upload PNG, JPG, or JPEG file (leave empty to keep current image)</small>
+                    <div id="imagePreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">Save</button>
+                    <button type="button" class="btn-cancel" onclick="closeRouteModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMenu() {
+            document.getElementById("navLinks").classList.toggle("show");
+        }
+
+        // Show section
+        function showSection(section) {
+            document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
+            document.getElementById('routesSection').style.display = section === 'routes' ? 'block' : 'none';
+            
+            if (section === 'users') loadUsers();
+            if (section === 'routes') loadRoutes();
+        }
+
+        // Check admin session
+        async function checkAdminSession() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/check_session', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.logged_in && result.is_admin) {
+                    document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}!`;
+                    loadUsers();
+                } else {
+                    window.location.href = 'http://localhost:5000/Login.html';
+                }
+            } catch(error) {
+                console.error('Session check failed:', error);
+                window.location.href = 'http://localhost:5000/Login.html';
+            }
+        }
+
+        // Load users
+        async function loadUsers() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/users', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = '';
+                    
+                    data.users.forEach(user => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = user.id;
+                        row.insertCell(1).textContent = user.username;
+                        row.insertCell(2).textContent = user.email;
+                        row.insertCell(3).textContent = user.barangay || '-';
+                        row.insertCell(4).textContent = user.contact_number || '-';
+                        const actionsCell = row.insertCell(5);
+                        actionsCell.innerHTML = `
+                            <button class="btn-edit" onclick="editUser(${user.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                        `;
+                    });
+                }
+            } catch(error) {
+                console.error('Failed to load users:', error);
+            }
+        }
+
+        // Load routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/routes', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('routesTableBody');
+                    tbody.innerHTML = '';
+                    
+                    data.routes.forEach(route => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = route.id;
+                        row.insertCell(1).textContent = route.stop_no;
+                        row.insertCell(2).textContent = route.area;
+                        row.insertCell(3).textContent = route.landmark || '-';
+                        row.insertCell(4).textContent = route.arrival_time;
+                        row.insertCell(5).textContent = route.duration;
+                        row.insertCell(6).textContent = route.departure_time;
+                        row.insertCell(7).textContent = route.barangay;
+                        row.insertCell(8).innerHTML = route.route_image ? `<img src="../img/${route.route_image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">` : '-';
+                        const actionsCell = row.insertCell(9);
+                        actionsCell.innerHTML = `
+                            <button class="btn-edit" onclick="editRoute(${route.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteRoute(${route.id})">Delete</button>
+                        `;
+                    });
+                }
+            } catch(error) {
+                console.error('Failed to load routes:', error);
+            }
+        }
+
+        // Get next stop number
+        async function getNextStopNumber() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/routes/next_stop', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                return data.next_stop;
+            } catch(error) {
+                console.error('Failed to get next stop number:', error);
+                return 1;
+            }
+        }
+
+        // Auto-calculate departure time
+        function calculateDepartureTime() {
+            const arrivalTime = document.getElementById('routeArrivalTime').value;
+            const duration = document.getElementById('routeDuration').value;
+            
+            if (arrivalTime && duration) {
+                const match = arrivalTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                if (match) {
+                    let hour = parseInt(match[1]);
+                    const minute = parseInt(match[2]);
+                    const period = match[3].toUpperCase();
+                    const durationMinutes = parseInt(duration);
+                    
+                    if (!isNaN(durationMinutes)) {
+                        if (period === 'PM' && hour !== 12) hour += 12;
+                        if (period === 'AM' && hour === 12) hour = 0;
+                        
+                        let totalMinutes = hour * 60 + minute + durationMinutes;
+                        let newHour = Math.floor(totalMinutes / 60);
+                        let newMinute = totalMinutes % 60;
+                        let newPeriod = newHour >= 12 ? 'PM' : 'AM';
+                        let newHour12 = newHour % 12;
+                        if (newHour12 === 0) newHour12 = 12;
+                        
+                        const departureTime = `${newHour12}:${newMinute.toString().padStart(2, '0')} ${newPeriod}`;
+                        document.getElementById('routeDepartureTime').value = departureTime;
+                    }
+                }
+            }
+        }
+
+        // Image preview
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #0e5125;">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // User CRUD
+        async function editUser(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('userId').value = data.user.id;
+                    document.getElementById('userUsername').value = data.user.username;
+                    document.getElementById('userEmail').value = data.user.email;
+                    document.getElementById('userBarangay').value = data.user.barangay || '';
+                    document.getElementById('userContact').value = data.user.contact_number || '';
+                    document.getElementById('userPassword').value = '';
+                    document.getElementById('userModalTitle').textContent = 'Edit User';
+                    document.getElementById('userModal').style.display = 'flex';
+                }
+            } catch(error) {
+                alert('Failed to load user data');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadUsers();
+                } catch(error) {
+                    alert('Failed to delete user');
+                }
+            }
+        }
+
+        function showUserModal() {
+            document.getElementById('userId').value = '';
+            document.getElementById('userUsername').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userBarangay').value = '';
+            document.getElementById('userContact').value = '';
+            document.getElementById('userModalTitle').textContent = 'Add User';
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Route CRUD
+        async function editRoute(id) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/routes/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('routeId').value = data.route.id;
+                    document.getElementById('routeStopNo').value = data.route.stop_no;
+                    document.getElementById('routeStopNo').readOnly = false;
+                    document.getElementById('routeArea').value = data.route.area;
+                    document.getElementById('routeLandmark').value = data.route.landmark || '';
+                    document.getElementById('routeArrivalTime').value = data.route.arrival_time;
+                    document.getElementById('routeDuration').value = data.route.duration;
+                    document.getElementById('routeDepartureTime').value = data.route.departure_time;
+                    document.getElementById('routeBarangay').value = data.route.barangay;
+                    document.getElementById('routeModalTitle').textContent = 'Edit Route';
+                    document.getElementById('routeModal').style.display = 'flex';
+                    
+                    // Show existing image preview
+                    if (data.route.route_image) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.innerHTML = `<img src="../img/${data.route.route_image}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #0e5125;"><br><small>Current image</small>`;
+                    }
+                }
+            } catch(error) {
+                alert('Failed to load route data');
+            }
+        }
+
+        async function deleteRoute(id) {
+            if (confirm('Are you sure you want to delete this route? This will affect stop numbering!')) {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/admin/routes/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadRoutes();
+                } catch(error) {
+                    alert('Failed to delete route');
+                }
+            }
+        }
+
+        async function showRouteModal() {
+            document.getElementById('routeId').value = '';
+            document.getElementById('routeArea').value = '';
+            document.getElementById('routeLandmark').value = '';
+            document.getElementById('routeArrivalTime').value = '';
+            document.getElementById('routeDuration').value = '';
+            document.getElementById('routeDepartureTime').value = '';
+            document.getElementById('routeBarangay').value = '';
+            document.getElementById('routeImageFile').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('routeModalTitle').textContent = 'Add Route';
+            
+            const nextStop = await getNextStopNumber();
+            document.getElementById('routeStopNo').value = nextStop;
+            document.getElementById('routeStopNo').readOnly = true;
+            
+            document.getElementById('routeModal').style.display = 'flex';
+        }
+
+        function closeRouteModal() {
+            document.getElementById('routeModal').style.display = 'none';
+        }
+
+        // Form submissions
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('userId').value;
+            const data = {
+                username: document.getElementById('userUsername').value,
+                email: document.getElementById('userEmail').value,
+                barangay: document.getElementById('userBarangay').value,
+                contact_number: document.getElementById('userContact').value
+            };
+            
+            if (document.getElementById('userPassword').value) {
+                data.password = document.getElementById('userPassword').value;
+            }
+            
+            const url = id ? `http://localhost:5000/api/admin/users/${id}` : 'http://localhost:5000/api/admin/users';
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message);
+                closeUserModal();
+                loadUsers();
+            } catch(error) {
+                alert('Failed to save user');
+            }
+        });
+
+        document.getElementById('routeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('routeId').value;
+            const imageFile = document.getElementById('routeImageFile').files[0];
+            
+            // Calculate departure time
+            const arrivalTime = document.getElementById('routeArrivalTime').value;
+            const duration = document.getElementById('routeDuration').value;
+            let departureTime = document.getElementById('routeDepartureTime').value;
+            
+            if (arrivalTime && duration) {
+                const match = arrivalTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                if (match) {
+                    let hour = parseInt(match[1]);
+                    const minute = parseInt(match[2]);
+                    const period = match[3].toUpperCase();
+                    const durationMinutes = parseInt(duration);
+                    
+                    if (!isNaN(durationMinutes)) {
+                        if (period === 'PM' && hour !== 12) hour += 12;
+                        if (period === 'AM' && hour === 12) hour = 0;
+                        
+                        let totalMinutes = hour * 60 + minute + durationMinutes;
+                        let newHour = Math.floor(totalMinutes / 60);
+                        let newMinute = totalMinutes % 60;
+                        let newPeriod = newHour >= 12 ? 'PM' : 'AM';
+                        let newHour12 = newHour % 12;
+                        if (newHour12 === 0) newHour12 = 12;
+                        
+                        departureTime = `${newHour12}:${newMinute.toString().padStart(2, '0')} ${newPeriod}`;
+                        document.getElementById('routeDepartureTime').value = departureTime;
+                    }
+                }
+            }
+            
+            // Prepare data
+            const data = {
+                stop_no: parseInt(document.getElementById('routeStopNo').value),
+                area: document.getElementById('routeArea').value,
+                landmark: document.getElementById('routeLandmark').value,
+                arrival_time: document.getElementById('routeArrivalTime').value,
+                duration: document.getElementById('routeDuration').value,
+                departure_time: departureTime,
+                barangay: document.getElementById('routeBarangay').value
+            };
+            
+            // Upload image if there's a new file
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                
+                try {
+                    const uploadResponse = await fetch('http://localhost:5000/api/admin/upload_route_image', {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    const uploadResult = await uploadResponse.json();
+                    
+                    if (uploadResult.success) {
+                        data.route_image = uploadResult.filename;
+                    } else {
+                        alert(uploadResult.message);
+                        return;
+                    }
+                } catch(error) {
+                    alert('Failed to upload image: ' + error);
+                    return;
+                }
+            }
+            
+            const url = id ? `http://localhost:5000/api/admin/routes/${id}` : 'http://localhost:5000/api/admin/routes';
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message);
+                closeRouteModal();
+                loadRoutes();
+            } catch(error) {
+                alert('Failed to save route: ' + error);
+            }
+        });
+
+        // Add event listeners
+        document.getElementById('routeArrivalTime').addEventListener('input', calculateDepartureTime);
+        document.getElementById('routeDuration').addEventListener('input', calculateDepartureTime);
+        document.getElementById('routeImageFile').addEventListener('change', function() {
+            previewImage(this);
+        });
+
+        // Logout
+        async function logout() {
+            try {
+                const response = await fetch('http://localhost:5000/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                alert(result.message);
+                window.location.href = 'http://localhost:5000/Login.html';
+            } catch(error) {
+                alert('Logout failed');
+                window.location.href = 'http://localhost:5000/Login.html';
+            }
+        }
+    </script>
+</body>
+</html>

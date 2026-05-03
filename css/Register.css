@@ -1,0 +1,341 @@
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body {
+    background-image: url('../img/bg_img.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Alfa Slab One', serif;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg,
+        rgba(14, 81, 37, 0.7),
+        rgba(106, 222, 107, 0.7),
+        rgba(194, 209, 157, 0.7)
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+#navbar, #homeh1, #app, p, .form-container {
+    position: relative;
+    z-index: 1;
+}
+
+#navbar {
+    width: 100%;
+    background: #fcf6db;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+}
+
+#logo {
+    width: 100px;
+    height: auto;
+    max-height: 80px;
+    object-fit: contain;
+}
+
+.hamburger {
+    display: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #0e5125;
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    z-index: 100;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#navbar a {
+    color: #0e5125;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.3em;
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+#navbar a:hover {
+    background: #0e5125;
+    color: #6ade6b;
+}
+
+.overlay {
+    display: none;
+}
+
+#app {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+}
+
+.form-box {
+    border: 3px solid #0e5125;
+    border-radius: 18px;
+    padding: 15px;
+    background: rgba(252, 246, 219, 0.95);
+    max-width: 320px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.form-box h2 {
+    text-align: center;
+    color: #0e5125;
+    margin-bottom: 12px;
+    font-size: 1.3em;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #0e5125;
+    font-weight: 600;
+    font-size: 0.85em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 15px;
+    border: 2px solid #c2d19d;
+    border-radius: 8px;
+    font-size: 13px;
+    background: white;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: #0e5125;
+    outline: none;
+}
+
+.form-box button {
+    background: #0e5125;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    width: 100%;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.form-box button:hover {
+    background: #6ade6b;
+    color: #0e5125;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 12px;
+    color: #333;
+    font-size: 0.8em;
+}
+
+
+.signup-link a {
+    color: #0e5125;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.signup-link a:hover {
+    color: #6ade6b;
+}
+
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #fcf6db;
+        flex-direction: column;
+        gap: 20px;
+        padding: 80px 20px 20px 20px;
+        transition: right 0.3s ease;
+        z-index: 999;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+        display: flex;
+    }
+    
+    .nav-links.show {
+        right: 0;
+    }
+    
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+    }
+    
+    .form-box {
+        max-width: 400px;
+        padding: 25px;
+    }
+    
+    .form-box h2 {
+        font-size: 1.6em;
+        margin-bottom: 20px;
+    }
+    
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+    
+    #logo {
+        width: 80px;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .form-box {
+        max-width: 95%;
+        padding: 20px;
+    }
+    
+    .form-box h2 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+    
+    .form-group input {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+    
+    .form-box button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .signup-link {
+        margin-top: 15px;
+        font-size: 0.85em;
+    }
+    
+    #app {
+        padding: 15px;
+        min-height: 70vh;
+    }
+    
+    .nav-links {
+        width: 250px;
+    }
+}
+/* DESKTOP STYLES */
+@media (min-width: 769px) {
+    #navbar {
+        justify-content: flex-start !important;
+        gap: 30px !important;
+    }
+    
+    .hamburger {
+        display: none !important;
+    }
+    
+    .nav-links {
+        position: static !important;
+        background: transparent !important;
+        flex-direction: row !important;
+        display: flex !important;
+    }
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px 20px;
+    border: 2px solid #c2d19d;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    box-sizing: border-box;
+    font-family: 'Alfa Slab One', serif;
+    color: #0e5125;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230e5125' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+}
+
+.form-group select:focus {
+    border-color: #0e5125;
+    outline: none;
+}
+
+@media (max-width: 480px) {
+    .form-group select {
+        padding: 8px 15px;
+        font-size: 13px;
+        background-size: 14px;
+        background-position: right 12px center;
+    }
+}

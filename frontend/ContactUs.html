@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/Contact.css">
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+    <title>Track My Trash - Contact Us</title>
+</head>
+<body>
+
+    <div id="navbar">
+        <img src="../img/logo.png" alt="Logo" id="logo">
+        <div class="hamburger">☰</div>
+        <div class="nav-links">
+            <a href="HomePage.html">Home</a>
+            <a href="AboutUs.html">About Us</a>
+            <a href="ContactUs.html">Contact Us</a>
+        </div>
+    </div>
+
+    <div id="contact-container">
+        <h1 id="contact-title">Send Us Feedback</h1>
+        
+        <div class="contact-wrapper">
+            <!-- Contact Info Side -->
+            <div class="contact-info">
+                <div class="info-card">
+                    <div class="info-icon">📍</div>
+                    <h3>Address</h3>
+                    <p>Quezon City Hall, Diliman, QC</p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">📞</div>
+                    <h3>Hotline</h3>
+                    <p>(02) 1234 5678</p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">✉️</div>
+                    <h3>Email</h3>
+                    <p>feedback@trackmytrash.com</p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">⏰</div>
+                    <h3>Hours</h3>
+                    <p>Mon-Fri: 8AM - 5PM</p>
+                </div>
+            </div>
+
+            <!-- Feedback Form Side - COMPACT -->
+            <div class="contact-form">
+                <form id="feedbackForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Your name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="Your email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Barangay</label>
+                            <select required>
+                                <option value="" disabled selected>Select barangay</option>
+                                <option>Bagong Pag-asa</option>
+                                <option>Batasan Hills</option>
+                                <option>Commonwealth</option>
+                                <option>Fairview</option>
+                                <option>Holy Spirit</option>
+                                <option>Payatas</option>
+                                <option>Tandang Sora</option>
+                                <option>U.P. Campus</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Feedback Type</label>
+                            <select required>
+                                <option value="" disabled selected>Select type</option>
+                                <option>Compliment</option>
+                                <option>Complaint</option>
+                                <option>Suggestion</option>
+                                <option>Report Issue</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea rows="3" placeholder="Write your feedback here..."></textarea>
+                    </div>
+                    
+                    <button type="submit">Send Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/LandingPage.css">
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+    <title>Track My Trash</title>
+</head>
+<body onload="checkSession()">
+
+    <div id="navbar">
+        <img src="../img/logo.png" alt="Logo" id="logo">
+        <div class="hamburger">☰</div>
+        <div class="nav-links" id="navLinks">
+            <a href="HomePage.html">Home</a>
+            <a href="About.html">About Us</a>
+            <a href="Contact.html">Contact Us</a>
+            <button id="logoutBtnMobile" onclick="logout()">Logout</button>
+        </div>
+        <button id="logoutBtnDesktop" onclick="logout()">Logout</button>
+    </div>
+    
+   
+    <h1 id="homeh1">WELCOME TO TRACK MY TRASH</h1>
+
+<br>
+<br>
+    <div id="app">
+        <a href="Login.html" id="scroll">
+            <img src="../img/scroll.png" alt="Log In">
+        </a>
+    </div>  
+    
+    <!-- SCROLLABLE DIV PARA SA SCHEDULE -->
+    <div class="schedule-scroll" id="scheduleSection" style="display: none;">
+         <h3 id="homeh2">EXPECTED ARRIVAL OF TRUCK</h3>
+         <h4 class="arrival-time-large">[Expected Arrival Date]</h4>
+        <div id="scheduleNotification">
+            Loading schedule...
+        </div>
+    </div>
+
+    <!-- Custom Popup Modal -->
+<div id="customPopup" class="custom-popup" style="display: none;">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3>🚛 TRACK MY TRASH</h3>
+        </div>
+        <div class="popup-body">
+            <p id="popupMessage"> You missed the arrival time. Please come back tomorrow!</p>
+            <div class="popup-details">
+                <p><strong>📅 Date:</strong> <span id="popupDate"></span></p>
+                <p><strong>⏰ Time:</strong> <span id="popupTime"></span></p>
+                <p><strong>📍 Area:</strong> <span id="popupArea"></span></p>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button onclick="closePopup()" class="popup-btn">OK</button>
+        </div>
+    </div>
+</div>
+    
+    <script src="../js/script.js"></script>
+</body>
+</html>

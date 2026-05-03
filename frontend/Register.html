@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/Register.css">
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+    <title>Track My Trash - Sign Up</title>
+</head>
+<body>
+
+    <div id="navbar">
+       <a href="HomePage.html"><img src="../img/logo.png" alt="Logo" id="logo"></a>
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="nav-links" id="navLinks">
+            <a href="HomePage.html">Home</a>
+            <a href="AboutUs.html">About Us</a>
+            <a href="ContactUs.html">Contact Us</a>
+        </div>
+    </div>
+    
+    <div id="app">
+        <div class="form-box">
+            <h2>Register</h2>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstname" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastname" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" required>
+                </div>
+
+               <div class="form-group">
+    <label>Contact No.</label>
+    <input type="tel" id="contact" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09123456789" required>
+    <small style="color: #666;">Numbers only (max 11 digits)</small>
+</div>
+
+                <div class="form-group">
+                    <label for="barangay">Area</label>
+                    <select id="barangay" name="barangay" required>
+                        <option value="" disabled selected>Loading areas...</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Sign Up</button>
+            </form>
+            
+            <p class="signup-link">Already have an account? <a href="Login.html">Login</a></p>
+        </div>
+    </div>
+    
+    <script src="../js/script.js"></script>
+    <script>
+        // Load areas from database
+        async function loadAreas() {
+            try {
+                const response = await fetch('http://localhost:5000/api/routes/areas', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                const select = document.getElementById('barangay');
+                select.innerHTML = '<option value="" disabled selected>Select your area</option>';
+                
+                if (data.success && data.areas.length > 0) {
+                    data.areas.forEach(area => {
+                        const option = document.createElement('option');
+                        option.value = area;
+                        option.textContent = area;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="" disabled selected>No areas available</option>';
+                }
+            } catch(error) {
+                console.error('Failed to load areas:', error);
+                const select = document.getElementById('barangay');
+                select.innerHTML = '<option value="" disabled selected>Error loading areas</option>';
+            }
+        }
+        
+        // Load areas when page loads
+        loadAreas();
+    </script>
+</body>
+</html>
