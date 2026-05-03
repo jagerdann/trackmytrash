@@ -28,13 +28,13 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Database connection
+# Database connection for Aiven MySQL
 db = mysql.connector.connect(
-    host="localhost",
-    port="3306",
-    user="root",
-    password="",
-    database="trackmytrash"
+    host=os.environ.get('DB_HOST', 'localhost'),
+    port=os.environ.get('DB_PORT', 3306),
+    user=os.environ.get('DB_USER', 'root'),
+    password=os.environ.get('DB_PASSWORD', ''),
+    database=os.environ.get('DB_NAME', 'trackmytrash')
 )
 cursor = db.cursor(dictionary=True)
 
