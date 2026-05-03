@@ -1,3 +1,6 @@
+// API Base URL - change this to your Render URL
+const API_BASE_URL = 'https://trackmytrash.onrender.com';
+
 // Wait for page to load
 document.addEventListener('DOMContentLoaded', function() {
     // NAVBAR MENU
@@ -47,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             try {
-                const response = await fetch('http://localhost:5000/api/feedback', {
+                const response = await fetch(`${API_BASE_URL}/api/feedback`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(formData)
@@ -81,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             try {
-                const response = await fetch('http://localhost:5000/api/register', {
+                const response = await fetch(`${API_BASE_URL}/api/register`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
@@ -92,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert(result.message);
                 
                 if (result.success) {
-                    window.location.href = 'http://localhost:5000/Login.html';
+                    window.location.href = `${API_BASE_URL}/Login.html`;
                 }
             } catch(error) {
                 alert('Connection error. Make sure the server is running.');
@@ -113,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             
             try {
-                const response = await fetch('http://localhost:5000/api/login', {
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
@@ -126,9 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('✅ ' + result.message);
                     
                     if (result.is_admin === true) {
-                        window.location.href = 'http://localhost:5000/AdminPage.html';
+                        window.location.href = `${API_BASE_URL}/AdminPage.html`;
                     } else {
-                        window.location.href = 'http://localhost:5000/LandingPage.html';
+                        window.location.href = `${API_BASE_URL}/LandingPage.html`;
                     }
                 } else {
                     alert('❌ ' + result.message);
@@ -147,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check admin session (for admin page)
 async function checkAdminSession() {
     try {
-        const response = await fetch('http://localhost:5000/api/check_session', {
+        const response = await fetch(`${API_BASE_URL}/api/check_session`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -157,11 +160,11 @@ async function checkAdminSession() {
             document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}! 👑`;
             if (typeof loadUsers === 'function') loadUsers();
         } else {
-            window.location.href = 'http://localhost:5000/Login.html';
+            window.location.href = `${API_BASE_URL}/Login.html`;
         }
     } catch(error) {
         console.error('Session check failed:', error);
-        window.location.href = 'http://localhost:5000/Login.html';
+        window.location.href = `${API_BASE_URL}/Login.html`;
     }
 }
 
@@ -172,7 +175,7 @@ let daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturd
 // Load schedules from database - PUBLIC endpoint
 async function loadSchedulesFromDB() {
     try {
-        const response = await fetch('http://localhost:5000/api/public/routes', {
+        const response = await fetch(`${API_BASE_URL}/api/public/routes`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -327,14 +330,14 @@ async function displaySchedule() {
         console.log("Schedules for day:", schedules);
         
         let userArea = null;
-        const sessionResponse = await fetch('http://localhost:5000/api/check_session', {
+        const sessionResponse = await fetch(`${API_BASE_URL}/api/check_session`, {
             method: 'GET',
             credentials: 'include'
         });
         const sessionResult = await sessionResponse.json();
         
         if (sessionResult.logged_in && !sessionResult.is_admin) {
-            const userResponse = await fetch(`http://localhost:5000/api/user/${sessionResult.username}`, {
+            const userResponse = await fetch(`${API_BASE_URL}/api/user/${sessionResult.username}`, {
                 method: 'GET',
                 credentials: 'include'
             });
@@ -448,7 +451,7 @@ async function checkSession() {
     try {
         await loadSchedulesFromDB();
         
-        const response = await fetch('http://localhost:5000/api/check_session', {
+        const response = await fetch(`${API_BASE_URL}/api/check_session`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -501,14 +504,14 @@ async function checkHomePageRedirect() {
     
     if (isHomePage) {
         try {
-            const response = await fetch('http://localhost:5000/api/check_session', {
+            const response = await fetch(`${API_BASE_URL}/api/check_session`, {
                 method: 'GET',
                 credentials: 'include'
             });
             const result = await response.json();
             
             if (result.logged_in) {
-                window.location.href = 'http://localhost:5000/LandingPage.html';
+                window.location.href = `${API_BASE_URL}/LandingPage.html`;
             }
         } catch(error) {
             console.error('Session check failed:', error);
@@ -522,13 +525,13 @@ checkHomePageRedirect();
 // ========== LOGOUT ==========
 async function logout() {
     try {
-        const response = await fetch('http://localhost:5000/api/logout', {
+        const response = await fetch(`${API_BASE_URL}/api/logout`, {
             method: 'POST',
             credentials: 'include'
         });
         const result = await response.json();
         alert(result.message);
-        window.location.href = 'http://localhost:5000/HomePage.html';
+        window.location.href = `${API_BASE_URL}/HomePage.html`;
     } catch(error) {
         alert('Logout failed. Please try again.');
         console.error(error);
