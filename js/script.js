@@ -170,7 +170,6 @@ async function checkAdminSession() {
 
 // Load areas for registration
 async function loadAreas() {
-    const API_BASE_URL = 'https://trackmytrash.onrender.com';
     try {
         const response = await fetch(`${API_BASE_URL}/api/routes/areas`);
         const data = await response.json();
