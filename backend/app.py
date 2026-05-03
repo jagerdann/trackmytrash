@@ -33,45 +33,23 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ========== DATABASE CONNECTION ==========
-import os
-import mysql.connector
-import re
-
-# Get DATABASE_URL from environment variable
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
-
-# ========== DATABASE CONNECTION ==========
-import os
-import mysql.connector
-
-# Get database URL from environment
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_PORT = os.environ.get('DB_PORT', 3306)
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
 DB_NAME = os.environ.get('DB_NAME', 'trackmytrash')
 
-# Always use environment variables in production
-if DB_HOST != 'localhost':
-    db = mysql.connector.connect(
+def get_db_connection():
+    return mysql.connector.connect(
         host=DB_HOST,
         port=int(DB_PORT),
         user=DB_USER,
         password=DB_PASSWORD,
         database=DB_NAME
     )
-    print(f"✅ Connected to database at {DB_HOST}")
-else:
-    # Local development
-    db = mysql.connector.connect(
-        host=DB_HOST,
-        port=int(DB_PORT),
-        user=DB_USER,
-        password=DB_PASSWORD,
-        database=DB_NAME
-    )
-    print("✅ Connected to local MySQL")
 
+# Initialize database connection
+db = get_db_connection()
 cursor = db.cursor(dictionary=True)
 
 # ========== SERVE FRONTEND FILES ==========
@@ -449,7 +427,7 @@ def login():
         session['is_admin'] = True
         return jsonify({
             "success": True, 
-            "message": "Admin login successful! Redirecting to Admin Panel...",
+            "message": f"Welcome Admin {admin['username']}!",
             "is_admin": True,
             "username": admin['username']
         })
