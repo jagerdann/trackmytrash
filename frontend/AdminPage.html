@@ -15,6 +15,7 @@
         <div class="nav-links" id="navLinks">
             <a href="#" onclick="showSection('users')">Users</a>
             <a href="#" onclick="showSection('routes')">Routes</a>
+            <a href="#" onclick="showSection('feedbacks')">Feedbacks</a>
             <a href="#" onclick="logout()">Logout</a>
         </div>
     </div>
@@ -42,7 +43,7 @@
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <td><td colspan="6">Loading users...</td></tr>
+                        <tr><td colspan="6">Loading users...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -72,6 +73,33 @@
                     </thead>
                     <tbody id="routesTableBody">
                         <tr><td colspan="10">Loading routes...</td></tr>
+                    </tbody>
+                <table>
+            </div>
+        </div>
+
+        <!-- Feedbacks Section -->
+        <div id="feedbacksSection" class="admin-section" style="display: none;">
+            <div class="section-header">
+                <h2>USER FEEDBACKS</h2>
+                <button class="btn-add" onclick="exportFeedbacks()">📥 Export to CSV</button>
+            </div>
+            <div class="table-container">
+                <table id="feedbacksTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Barangay</th>
+                            <th>Feedback Type</th>
+                            <th>Message</th>
+                            <th>Date Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbacksTableBody">
+                        <tr><td colspan="8">Loading feedbacks...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -179,9 +207,11 @@
         function showSection(section) {
             document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
             document.getElementById('routesSection').style.display = section === 'routes' ? 'block' : 'none';
+            document.getElementById('feedbacksSection').style.display = section === 'feedbacks' ? 'block' : 'none';
             
             if (section === 'users') loadUsers();
             if (section === 'routes') loadRoutes();
+            if (section === 'feedbacks') loadFeedbacks();
         }
 
         // Check admin session
@@ -270,6 +300,130 @@
                 }
             } catch(error) {
                 console.error('Failed to load routes:', error);
+            }
+        }
+
+        // ========== FEEDBACKS FUNCTIONS ==========
+
+        // Load feedbacks
+        async function loadFeedbacks() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('feedbacksTableBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.feedbacks.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No feedbacks yet</td></tr>';
+                        return;
+                    }
+                    
+                    data.feedbacks.forEach(feedback => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = feedback.id;
+                        row.insertCell(1).textContent = feedback.name;
+                        row.insertCell(2).textContent = feedback.email;
+                        row.insertCell(3).textContent = feedback.barangay || '-';
+                        
+                        // Feedback type with badge styling
+                        const typeCell = row.insertCell(4);
+                        let badgeClass = '';
+                        const type = (feedback.feedback_type || 'general').toLowerCase();
+                        switch(type) {
+                            case 'complaint': badgeClass = 'complaint'; break;
+                            case 'suggestion': badgeClass = 'suggestion'; break;
+                            case 'question': badgeClass = 'question'; break;
+                            case 'praise': 
+                            case 'compliment': badgeClass = 'praise'; break;
+                            default: badgeClass = 'general';
+                        }
+                        typeCell.innerHTML = `<span class="feedback-badge ${badgeClass}">${feedback.feedback_type || 'General'}</span>`;
+                        
+                        // Message with truncation for long messages
+                        let message = feedback.message || '-';
+                        if (message.length > 100) {
+                            message = message.substring(0, 100) + '...';
+                        }
+                        row.insertCell(5).textContent = message;
+                        
+                        const date = new Date(feedback.created_at);
+                        row.insertCell(6).textContent = date.toLocaleString('en-PH', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        const actionsCell = row.insertCell(7);
+                        actionsCell.innerHTML = `<button class="btn-delete" onclick="deleteFeedback(${feedback.id})">Delete</button>`;
+                    });
+                } else {
+                    document.getElementById('feedbacksTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center;">Failed to load feedbacks</td></tr>';
+                }
+            } catch(error) {
+                console.error('Failed to load feedbacks:', error);
+                document.getElementById('feedbacksTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading feedbacks</td></tr>';
+            }
+        }
+
+        // Delete feedback
+        async function deleteFeedback(id) {
+            if (confirm('Are you sure you want to delete this feedback?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadFeedbacks();
+                } catch(error) {
+                    alert('Failed to delete feedback');
+                }
+            }
+        }
+
+        // Export feedbacks to CSV
+        async function exportFeedbacks() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success && data.feedbacks.length > 0) {
+                    const headers = ['ID', 'Name', 'Email', 'Barangay', 'Feedback Type', 'Message', 'Date Submitted'];
+                    const rows = data.feedbacks.map(f => [
+                        f.id,
+                        `"${(f.name || '').replace(/"/g, '""')}"`,
+                        f.email,
+                        f.barangay || '',
+                        f.feedback_type || '',
+                        `"${(f.message || '').replace(/"/g, '""')}"`,
+                        new Date(f.created_at).toLocaleString()
+                    ]);
+                    
+                    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `feedbacks_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    alert('Feedbacks exported successfully!');
+                } else {
+                    alert('No feedbacks to export');
+                }
+            } catch(error) {
+                alert('Failed to export feedbacks');
             }
         }
 

@@ -499,6 +499,17 @@ def get_user_by_username(username):
         return jsonify({"success": True, "user": user})
     else:
         return jsonify({"success": False, "message": "User not found"})
+    
+
+    # ========== ADMIN FEEDBACKS ==========
+@app.route('/api/admin/feedbacks', methods=['GET'])
+def admin_get_feedbacks():
+    if not session.get('admin_logged_in'):
+        return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
+    cursor.execute("SELECT * FROM feedbacks ORDER BY created_at DESC")
+    feedbacks = cursor.fetchall()
+    return jsonify({"success": True, "feedbacks": feedbacks})
 
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
@@ -510,13 +521,25 @@ def feedback():
     feedback_type = data.get('feedback_type')
     message = data.get('message')
     
+    # PALITAN: 'feedback' → 'feedbacks' 👇
     cursor.execute("""
-        INSERT INTO feedback (name, email, barangay, feedback_type, message) 
+        INSERT INTO feedbacks (name, email, barangay, feedback_type, message) 
         VALUES (%s, %s, %s, %s, %s)
     """, (name, email, barangay, feedback_type, message))
     db.commit()
     
     return jsonify({"success": True, "message": "Thank you for your feedback!"})
+
+
+@app.route('/api/admin/feedbacks/<int:feedback_id>', methods=['DELETE'])
+def admin_delete_feedback(feedback_id):
+    if not session.get('admin_logged_in'):
+        return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
+    cursor.execute("DELETE FROM feedbacks WHERE id = %s", (feedback_id,))
+    db.commit()
+    return jsonify({"success": True, "message": "Feedback deleted successfully!"})
+
 
 @app.route('/api/test', methods=['GET'])
 def test():

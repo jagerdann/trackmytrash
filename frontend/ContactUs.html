@@ -50,25 +50,25 @@
                 </div>
             </div>
 
-            <!-- Feedback Form Side - COMPACT -->
+            <!-- Feedback Form Side - FIXED with proper IDs -->
             <div class="contact-form">
                 <form id="feedbackForm">
                     <div class="form-row">
                         <div class="form-group">
                             <label>Full Name</label>
-                            <input type="text" placeholder="Your name" required>
+                            <input type="text" id="feedbackName" placeholder="Your name" required>
                         </div>
                         
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" placeholder="Your email" required>
+                            <input type="email" id="feedbackEmail" placeholder="Your email" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label>Barangay</label>
-                            <select required>
+                            <select id="feedbackBarangay" required>
                                 <option value="" disabled selected>Select barangay</option>
                                 <option>Bagong Pag-asa</option>
                                 <option>Batasan Hills</option>
@@ -83,19 +83,19 @@
                         
                         <div class="form-group">
                             <label>Feedback Type</label>
-                            <select required>
+                            <select id="feedbackType" required>
                                 <option value="" disabled selected>Select type</option>
-                                <option>Compliment</option>
-                                <option>Complaint</option>
-                                <option>Suggestion</option>
-                                <option>Report Issue</option>
+                                <option value="compliment">Compliment / Praise</option>
+                                <option value="complaint">Complaint</option>
+                                <option value="suggestion">Suggestion</option>
+                                <option value="question">Question / Report Issue</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label>Message</label>
-                        <textarea rows="3" placeholder="Write your feedback here..."></textarea>
+                        <textarea id="feedbackMessage" rows="3" placeholder="Write your feedback here..." required></textarea>
                     </div>
                     
                     <button type="submit">Send Feedback</button>
@@ -104,15 +104,74 @@
         </div>
     </div>
 
+    <!-- Success Popup (hidden by default) -->
+    <div id="successPopup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #0e5125; color: white; padding: 20px 30px; border-radius: 10px; text-align: center; z-index: 2000; font-family: 'Alfa Slab One', serif; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+        <p>✅ Thank you for your feedback!</p>
+        <p style="font-size: 12px; margin-top: 10px;">We appreciate your message.</p>
+    </div>
+
     <script src="../js/script.js"></script>
     <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker registered:', reg))
-      .catch(err => console.log('Service Worker failed:', err));
-  });
-}
-</script>
+        // Service Worker registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered:', reg))
+                    .catch(err => console.log('Service Worker failed:', err));
+            });
+        }
+
+        // Feedback form submission handler (para sure na gumana kahit wala sa script.js)
+        document.addEventListener('DOMContentLoaded', function() {
+            const feedbackForm = document.getElementById('feedbackForm');
+            
+            if (feedbackForm) {
+                feedbackForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Get values using the correct IDs
+                    const formData = {
+                        name: document.getElementById('feedbackName')?.value || '',
+                        email: document.getElementById('feedbackEmail')?.value || '',
+                        barangay: document.getElementById('feedbackBarangay')?.value || '',
+                        feedback_type: document.getElementById('feedbackType')?.value || '',
+                        message: document.getElementById('feedbackMessage')?.value || ''
+                    };
+                    
+                    console.log('Sending feedback:', formData);
+                    
+                    try {
+                        const response = await fetch('https://trackmytrash.onrender.com/api/feedback', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const result = await response.json();
+                        console.log('Response:', result);
+                        
+                        if (result.success) {
+                            // Show success popup
+                            const popup = document.getElementById('successPopup');
+                            if (popup) {
+                                popup.style.display = 'block';
+                                setTimeout(() => {
+                                    popup.style.display = 'none';
+                                }, 3000);
+                            }
+                            feedbackForm.reset();
+                        } else {
+                            alert('Error: ' + (result.message || 'Something went wrong'));
+                        }
+                    } catch(error) {
+                        console.error('Error:', error);
+                        alert('Connection error. Please try again later.');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
