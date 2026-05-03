@@ -389,14 +389,20 @@ def admin_delete_route(route_id):
     reorder_stop_numbers()
     return jsonify({"success": True, "message": "Route deleted successfully! Stop numbers have been reordered."})
 
-# ========== GET ALL AREAS FOR REGISTRATION ==========
 @app.route('/api/routes/areas', methods=['GET'])
 def get_all_areas():
-    clear_cursor()
-    cursor.execute("SELECT DISTINCT area FROM garbage_schedules ORDER BY area")
-    areas = cursor.fetchall()
-    area_list = [area['area'] for area in areas]
-    return jsonify({"success": True, "areas": area_list})
+    try:
+        clear_cursor()
+        # Simplify query - remove DISTINCT for now
+        cursor.execute("SELECT area FROM garbage_schedules ORDER BY stop_no")
+        areas = cursor.fetchall()
+        print(f"Found {len(areas)} areas")  # Debug log
+        
+        area_list = [area['area'] for area in areas]
+        return jsonify({"success": True, "areas": area_list})
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"success": False, "areas": [], "error": str(e)})
 
 # ========== USER API ==========
 @app.route('/api/register', methods=['POST'])
