@@ -9,7 +9,8 @@ import time
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["*"])
+CORS(app, supports_credentials=True, 
+     origins=["https://trackmytrash.onrender.com", "http://localhost:5000", "https://*.onrender.com"])
 
 # Session configuration
 app.config['SECRET_KEY'] = 'trackmytrash_secret_key_2024'
@@ -72,6 +73,7 @@ else:
     print("✅ Connected to local MySQL")
 
 cursor = db.cursor(dictionary=True)
+
 # ========== SERVE FRONTEND FILES ==========
 frontend_path = os.path.join(PROJECT_ROOT, 'frontend')
 css_path = os.path.join(PROJECT_ROOT, 'css')
