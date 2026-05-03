@@ -52,6 +52,11 @@ def get_db_connection():
 db = get_db_connection()
 cursor = db.cursor(dictionary=True)
 
+# Helper function to clear unread results
+def clear_cursor():
+    while cursor.nextset():
+        pass
+
 # ========== SERVE FRONTEND FILES ==========
 frontend_path = os.path.join(PROJECT_ROOT, 'frontend')
 css_path = os.path.join(PROJECT_ROOT, 'css')
@@ -80,7 +85,6 @@ def serve_img(filename):
 
 # ========== HELPER FUNCTION ==========
 def calculate_departure_time(arrival_time, duration):
-    """Calculate departure time based on arrival time and duration"""
     if not arrival_time or not duration:
         return arrival_time
     
@@ -112,7 +116,7 @@ def calculate_departure_time(arrival_time, duration):
     return f"{new_hour_12}:{new_minute:02d} {new_period}"
 
 def reorder_stop_numbers():
-    """Reassign stop numbers sequentially starting from 1"""
+    clear_cursor()
     cursor.execute("SELECT id FROM garbage_schedules ORDER BY stop_no, id")
     routes = cursor.fetchall()
     
@@ -154,6 +158,7 @@ def upload_route_image():
 # ========== ADMIN AUTH ==========
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
+    clear_cursor()
     data = request.json
     username = data.get('username')
     password = data.get('password')
@@ -192,6 +197,7 @@ def admin_logout():
 def admin_get_users():
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("SELECT id, username, email, barangay, contact_number, created_at FROM users ORDER BY id DESC")
     users = cursor.fetchall()
     return jsonify({"success": True, "users": users})
@@ -200,6 +206,7 @@ def admin_get_users():
 def admin_get_user(user_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("SELECT id, username, email, barangay, contact_number, created_at FROM users WHERE id = %s", (user_id,))
     user = cursor.fetchone()
     if user:
@@ -210,6 +217,7 @@ def admin_get_user(user_id):
 def admin_create_user():
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -233,6 +241,7 @@ def admin_create_user():
 def admin_update_user(user_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -253,6 +262,7 @@ def admin_update_user(user_id):
 def admin_delete_user(user_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
     db.commit()
     return jsonify({"success": True, "message": "User deleted successfully!"})
@@ -262,6 +272,7 @@ def admin_delete_user(user_id):
 def admin_get_routes():
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("SELECT * FROM garbage_schedules ORDER BY stop_no")
     routes = cursor.fetchall()
     return jsonify({"success": True, "routes": routes})
@@ -270,6 +281,7 @@ def admin_get_routes():
 def admin_get_next_stop():
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("SELECT MAX(stop_no) as max_stop FROM garbage_schedules")
     result = cursor.fetchone()
     next_stop = (result['max_stop'] or 0) + 1
@@ -279,6 +291,7 @@ def admin_get_next_stop():
 def admin_get_route(route_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     cursor.execute("SELECT * FROM garbage_schedules WHERE id = %s", (route_id,))
     route = cursor.fetchone()
     if route:
@@ -289,6 +302,7 @@ def admin_get_route(route_id):
 def admin_create_route():
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     data = request.json
     area = data.get('area')
     landmark = data.get('landmark')
@@ -328,6 +342,7 @@ def admin_create_route():
 def admin_update_route(route_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
+    clear_cursor()
     data = request.json
     stop_no = data.get('stop_no')
     area = data.get('area')
@@ -368,17 +383,16 @@ def admin_update_route(route_id):
 def admin_delete_route(route_id):
     if not session.get('admin_logged_in'):
         return jsonify({"success": False, "message": "Unauthorized"})
-    
+    clear_cursor()
     cursor.execute("DELETE FROM garbage_schedules WHERE id = %s", (route_id,))
     db.commit()
-    
     reorder_stop_numbers()
-    
     return jsonify({"success": True, "message": "Route deleted successfully! Stop numbers have been reordered."})
 
 # ========== GET ALL AREAS FOR REGISTRATION ==========
 @app.route('/api/routes/areas', methods=['GET'])
 def get_all_areas():
+    clear_cursor()
     cursor.execute("SELECT DISTINCT area FROM garbage_schedules ORDER BY area")
     areas = cursor.fetchall()
     area_list = [area['area'] for area in areas]
@@ -387,6 +401,7 @@ def get_all_areas():
 # ========== USER API ==========
 @app.route('/api/register', methods=['POST'])
 def register():
+    clear_cursor()
     data = request.json
     username = data.get('username')
     email = data.get('email')
@@ -410,11 +425,11 @@ def register():
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    clear_cursor()
     data = request.json
     username = data.get('username')
     password = data.get('password')
     
-    # Check admin first
     cursor.execute("SELECT * FROM admins WHERE username = %s AND password = %s", (username, password))
     admin = cursor.fetchone()
     
@@ -432,7 +447,6 @@ def login():
             "username": admin['username']
         })
     
-    # Regular user login
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, hashed_password))
     user = cursor.fetchone()
@@ -471,6 +485,7 @@ def logout():
 
 @app.route('/api/user/<username>', methods=['GET'])
 def get_user_by_username(username):
+    clear_cursor()
     cursor.execute("SELECT id, username, email, barangay, contact_number FROM users WHERE username = %s", (username,))
     user = cursor.fetchone()
     
@@ -481,6 +496,7 @@ def get_user_by_username(username):
 
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
+    clear_cursor()
     data = request.json
     name = data.get('name')
     email = data.get('email')
@@ -498,13 +514,15 @@ def feedback():
 
 @app.route('/api/test', methods=['GET'])
 def test():
+    clear_cursor()
     cursor.execute("SELECT * FROM garbage_schedules")
     schedules = cursor.fetchall()
     return jsonify({"count": len(schedules), "schedules": schedules})
 
-# ========== PUBLIC ROUTES (no login required) ==========
+# ========== PUBLIC ROUTES ==========
 @app.route('/api/public/routes', methods=['GET'])
 def get_public_routes():
+    clear_cursor()
     cursor.execute("SELECT stop_no, area, arrival_time, duration, route_image FROM garbage_schedules ORDER BY stop_no")
     routes = cursor.fetchall()
     return jsonify({"success": True, "routes": routes})
