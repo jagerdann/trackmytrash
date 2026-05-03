@@ -32,5 +32,14 @@
    <p class="click">Dont have an account? <a href="Register.html">Sign Up</a></p>
 
    <script src="../js/script.js"></script>
+   <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker registered:', reg))
+      .catch(err => console.log('Service Worker failed:', err));
+  });
+}
+</script>
 </body>
 </html>

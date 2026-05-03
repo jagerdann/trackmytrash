@@ -545,56 +545,21 @@ async function checkHomePageRedirect() {
 // Call this when page loads
 checkHomePageRedirect();
 
-// Ito ang magsa-save ng install prompt para magamit natin manually
+//dito nagstart yung application 
+
+// ========== PWA INSTALL PROMPT (with engagement tracking) ==========
 let deferredPrompt;
+let engagementMet = false;
+let startTime = Date.now();
+let engagementChecked = false;
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Pigilan ang default na prompt para hindi agad lumabas
-  e.preventDefault();
-  // I-save ang event para magamit natin later
-  deferredPrompt = e;
-  
-  // DITO NIYO I-DISPLAY ANG CUSTOM BANNER NIYO
-  // Halimbawa: gawing visible ang inyong install banner div
-  showInstallBanner(); 
-});
-
-// Function para ipakita ang custom banner (pwede niyong i-design)
+// Function para ipakita ang custom banner
 function showInstallBanner() {
   const banner = document.getElementById('installBanner');
   if (banner) {
-    banner.style.display = 'flex'; // ipakita ang banner
+    banner.style.display = 'flex';
+    console.log('Install banner shown');
   }
-}
-
-// Kapag pinindot ang "Install"
-const installBtn = document.getElementById('installBtn');
-if (installBtn) {
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      // Ipakita ang native na install prompt
-      deferredPrompt.prompt();
-      // Hintayin ang desisyon ng user
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response: ${outcome}`);
-      // I-reset ang prompt (magagamit lang isang beses)
-      deferredPrompt = null;
-    }
-    // Itago ang custom banner
-    hideInstallBanner();
-  });
-}
-
-// Kapag pinindot ang "Not Now" - itago ang banner at tandaan na ayaw niya
-const dismissBtn = document.getElementById('dismissBtn');
-if (dismissBtn) {
-  dismissBtn.addEventListener('click', () => {
-    hideInstallBanner();
-    // I-save sa localStorage na ayaw ng user para hindi na ulit lumabas (halimbawa, 7 araw)
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 7); // 7 days na hindi lalabas
-    localStorage.setItem('pwaInstallDismissed', expiryDate.toISOString());
-  });
 }
 
 function hideInstallBanner() {
@@ -602,14 +567,116 @@ function hideInstallBanner() {
   if (banner) banner.style.display = 'none';
 }
 
-// Sa simula, suriin kung ayaw na ng user para hindi na ipakita ang banner
-function checkIfDismissed() {
+// Suriin kung dismissed na ng user
+function isInstallDismissed() {
   const dismissedUntil = localStorage.getItem('pwaInstallDismissed');
   if (dismissedUntil && new Date(dismissedUntil) > new Date()) {
-    return true; // Ayaw pa niya, huwag ipakita
+    console.log('Install banner dismissed until:', new Date(dismissedUntil));
+    return true;
   }
   return false;
 }
+
+// Suriin kung pwedeng magpakita ng banner
+function checkAndShowBanner() {
+  // Kung na-dismiss na, huwag ipakita
+  if (isInstallDismissed()) return;
+  
+  // Kunin ang engagement status mula localStorage
+  const hasClicked = localStorage.getItem('pwaUserClicked') === 'true';
+  const hasSpent30s = localStorage.getItem('pwaUserSpent30s') === 'true';
+  
+  console.log('Engagement check:', { hasClicked, hasSpent30s, hasPrompt: !!deferredPrompt });
+  
+  // Kung na-meet ang engagement at may prompt, ipakita ang banner
+  if (hasClicked && hasSpent30s && deferredPrompt && !engagementChecked) {
+    engagementChecked = true;
+    showInstallBanner();
+  }
+}
+
+// I-track ang pag-click ng user (kahit saan sa page)
+function trackUserClick() {
+  if (localStorage.getItem('pwaUserClicked') === 'true') return;
+  
+  console.log('User clicked - engagement started');
+  localStorage.setItem('pwaUserClicked', 'true');
+  startTime = Date.now();
+  checkAndShowBanner();
+}
+
+// I-track ang 30 seconds na pag-stay sa page
+function startEngagementTimer() {
+  const interval = setInterval(() => {
+    const hasSpent30s = localStorage.getItem('pwaUserSpent30s') === 'true';
+    if (hasSpent30s) {
+      clearInterval(interval);
+      return;
+    }
+    
+    const secondsSpent = Math.floor((Date.now() - startTime) / 1000);
+    if (secondsSpent >= 30) {
+      console.log('User spent 30 seconds on page');
+      localStorage.setItem('pwaUserSpent30s', 'true');
+      checkAndShowBanner();
+      clearInterval(interval);
+    }
+  }, 1000);
+}
+
+// Listen for beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt event fired!');
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Kapag may prompt na, i-check kung pwedeng magpakita ng banner
+  checkAndShowBanner();
+});
+
+// I-setup ang lahat ng PWA-related pagkatapos mag-load ng DOM
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded - setting up PWA install');
+  
+  // I-attach ang click tracking sa buong document
+  document.body.addEventListener('click', trackUserClick, { once: true });
+  
+  // Simulan ang timer para sa engagement
+  startEngagementTimer();
+  
+  // I-setup ang install button
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      console.log('Install button clicked');
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User ${outcome} the installation`);
+        deferredPrompt = null;
+      }
+      hideInstallBanner();
+    });
+  } else {
+    console.log('Install button not found in DOM');
+  }
+  
+  // I-setup ang dismiss button
+  const dismissBtn = document.getElementById('dismissBtn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      console.log('Dismiss button clicked');
+      hideInstallBanner();
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 7);
+      localStorage.setItem('pwaInstallDismissed', expiryDate.toISOString());
+    });
+  } else {
+    console.log('Dismiss button not found in DOM');
+  }
+});
+
+//dito nag end 
 
 // ========== LOGOUT ==========
 async function logout() {

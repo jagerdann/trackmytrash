@@ -2,7 +2,7 @@
   "name": "Track My Trash",
   "short_name": "TrackTrash",
   "description": "Garbage truck route tracking system",
-  "start_url": "/LandingPage.html",
+  "start_url": "/Login.html",
   "display": "standalone",
   "theme_color": "#0e5125",
   "background_color": "#fcf6db",

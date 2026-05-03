@@ -19,6 +19,15 @@
         </div>
     </div>
 
+    <!-- PWA Install Banner -->
+<div id="installBanner" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #0e5125; color: white; padding: 16px; text-align: center; z-index: 1000; font-family: Arial, sans-serif; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+  <span style="margin: 5px;">📱 I-install ang Track My Trash app!</span>
+  <div style="margin: 5px;">
+    <button id="installBtn" style="background: white; color: #0e5125; border: none; padding: 10px 20px; margin-right: 10px; border-radius: 5px; font-weight: bold;">Install</button>
+    <button id="dismissBtn" style="background: transparent; color: white; border: 1px solid white; padding: 10px 20px; border-radius: 5px;">Not Now</button>
+  </div>
+</div>
+
     <div id="app">
         <div class="form-box">
             <h2>Login</h2>
@@ -38,5 +47,14 @@
     </div>
     
     <script src="../js/script.js"></script>
+    <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker registered:', reg))
+      .catch(err => console.log('Service Worker failed:', err));
+  });
+}
+</script>
 </body>
 </html>
