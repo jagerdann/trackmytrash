@@ -42,7 +42,7 @@
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <tr><td colspan="6">Loading users...<\/td>境
+                        <td><td colspan="6">Loading users...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -71,7 +71,7 @@
                         </tr>
                     </thead>
                     <tbody id="routesTableBody">
-                        <tr><td colspan="10">Loading routes...<\/td>境
+                        <tr><td colspan="10">Loading routes...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -167,6 +167,9 @@
     </div>
 
     <script>
+        // API Base URL - change this to your Render URL
+        const API_BASE_URL = 'https://trackmytrash.onrender.com';
+        
         // Toggle mobile menu
         function toggleMenu() {
             document.getElementById("navLinks").classList.toggle("show");
@@ -184,7 +187,7 @@
         // Check admin session
         async function checkAdminSession() {
             try {
-                const response = await fetch('http://localhost:5000/api/admin/check_session', {
+                const response = await fetch(`${API_BASE_URL}/api/check_session`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -194,18 +197,18 @@
                     document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}!`;
                     loadUsers();
                 } else {
-                    window.location.href = 'http://localhost:5000/Login.html';
+                    window.location.href = `${API_BASE_URL}/Login.html`;
                 }
             } catch(error) {
                 console.error('Session check failed:', error);
-                window.location.href = 'http://localhost:5000/Login.html';
+                window.location.href = `${API_BASE_URL}/Login.html`;
             }
         }
 
         // Load users
         async function loadUsers() {
             try {
-                const response = await fetch('http://localhost:5000/api/admin/users', {
+                const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -237,7 +240,7 @@
         // Load routes
         async function loadRoutes() {
             try {
-                const response = await fetch('http://localhost:5000/api/admin/routes', {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -273,7 +276,7 @@
         // Get next stop number
         async function getNextStopNumber() {
             try {
-                const response = await fetch('http://localhost:5000/api/admin/routes/next_stop', {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes/next_stop`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -331,7 +334,7 @@
         // User CRUD
         async function editUser(id) {
             try {
-                const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -355,7 +358,7 @@
         async function deleteUser(id) {
             if (confirm('Are you sure you want to delete this user?')) {
                 try {
-                    const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
@@ -386,7 +389,7 @@
         // Route CRUD
         async function editRoute(id) {
             try {
-                const response = await fetch(`http://localhost:5000/api/admin/routes/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes/${id}`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -405,7 +408,6 @@
                     document.getElementById('routeModalTitle').textContent = 'Edit Route';
                     document.getElementById('routeModal').style.display = 'flex';
                     
-                    // Show existing image preview
                     if (data.route.route_image) {
                         const preview = document.getElementById('imagePreview');
                         preview.innerHTML = `<img src="../img/${data.route.route_image}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #0e5125;"><br><small>Current image</small>`;
@@ -419,7 +421,7 @@
         async function deleteRoute(id) {
             if (confirm('Are you sure you want to delete this route? This will affect stop numbering!')) {
                 try {
-                    const response = await fetch(`http://localhost:5000/api/admin/routes/${id}`, {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/routes/${id}`, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
@@ -471,7 +473,7 @@
                 data.password = document.getElementById('userPassword').value;
             }
             
-            const url = id ? `http://localhost:5000/api/admin/users/${id}` : 'http://localhost:5000/api/admin/users';
+            const url = id ? `${API_BASE_URL}/api/admin/users/${id}` : `${API_BASE_URL}/api/admin/users`;
             const method = id ? 'PUT' : 'POST';
             
             try {
@@ -496,7 +498,6 @@
             const id = document.getElementById('routeId').value;
             const imageFile = document.getElementById('routeImageFile').files[0];
             
-            // Calculate departure time
             const arrivalTime = document.getElementById('routeArrivalTime').value;
             const duration = document.getElementById('routeDuration').value;
             let departureTime = document.getElementById('routeDepartureTime').value;
@@ -526,7 +527,6 @@
                 }
             }
             
-            // Prepare data
             const data = {
                 stop_no: parseInt(document.getElementById('routeStopNo').value),
                 area: document.getElementById('routeArea').value,
@@ -537,13 +537,12 @@
                 barangay: document.getElementById('routeBarangay').value
             };
             
-            // Upload image if there's a new file
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('image', imageFile);
                 
                 try {
-                    const uploadResponse = await fetch('http://localhost:5000/api/admin/upload_route_image', {
+                    const uploadResponse = await fetch(`${API_BASE_URL}/api/admin/upload_route_image`, {
                         method: 'POST',
                         credentials: 'include',
                         body: formData
@@ -562,7 +561,7 @@
                 }
             }
             
-            const url = id ? `http://localhost:5000/api/admin/routes/${id}` : 'http://localhost:5000/api/admin/routes';
+            const url = id ? `${API_BASE_URL}/api/admin/routes/${id}` : `${API_BASE_URL}/api/admin/routes`;
             const method = id ? 'PUT' : 'POST';
             
             try {
@@ -591,16 +590,16 @@
         // Logout
         async function logout() {
             try {
-                const response = await fetch('http://localhost:5000/api/logout', {
+                const response = await fetch(`${API_BASE_URL}/api/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
                 const result = await response.json();
                 alert(result.message);
-                window.location.href = 'http://localhost:5000/Login.html';
+                window.location.href = `${API_BASE_URL}/Login.html`;
             } catch(error) {
                 alert('Logout failed');
-                window.location.href = 'http://localhost:5000/Login.html';
+                window.location.href = `${API_BASE_URL}/Login.html`;
             }
         }
     </script>

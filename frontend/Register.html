@@ -49,11 +49,11 @@
                     <input type="password" id="password" required>
                 </div>
 
-               <div class="form-group">
-    <label>Contact No.</label>
-    <input type="tel" id="contact" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09123456789" required>
-    <small style="color: #666;">Numbers only (max 11 digits)</small>
-</div>
+                <div class="form-group">
+                    <label>Contact No.</label>
+                    <input type="tel" id="contact" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="09123456789" required>
+                    <small style="color: #666;">Numbers only (max 11 digits)</small>
+                </div>
 
                 <div class="form-group">
                     <label for="barangay">Area</label>
@@ -71,10 +71,13 @@
     
     <script src="../js/script.js"></script>
     <script>
+        // API Base URL
+        const API_BASE_URL = 'https://trackmytrash.onrender.com';
+        
         // Load areas from database
         async function loadAreas() {
             try {
-                const response = await fetch('http://localhost:5000/api/routes/areas', {
+                const response = await fetch(`${API_BASE_URL}/api/routes/areas`, {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -83,7 +86,7 @@
                 const select = document.getElementById('barangay');
                 select.innerHTML = '<option value="" disabled selected>Select your area</option>';
                 
-                if (data.success && data.areas.length > 0) {
+                if (data.success && data.areas && data.areas.length > 0) {
                     data.areas.forEach(area => {
                         const option = document.createElement('option');
                         option.value = area;
