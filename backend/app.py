@@ -9,7 +9,7 @@ import time
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5000", "http://localhost:5000"])
+CORS(app, supports_credentials=True, origins=["*"])
 
 # Session configuration
 app.config['SECRET_KEY'] = 'trackmytrash_secret_key_2024'
@@ -18,7 +18,10 @@ app.config['SESSION_PERMANENT'] = False
 Session(app)
 
 # Upload configuration
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'img')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
+
+UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'img')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'PNG', 'JPG', 'JPEG', 'GIF'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -28,22 +31,50 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Database connection for Aiven MySQL
-db = mysql.connector.connect(
-    host=os.environ.get('DB_HOST', 'localhost'),
-    port=os.environ.get('DB_PORT', 3306),
-    user=os.environ.get('DB_USER', 'root'),
-    password=os.environ.get('DB_PASSWORD', ''),
-    database=os.environ.get('DB_NAME', 'trackmytrash')
-)
+# ========== DATABASE CONNECTION ==========
+# Try DATABASE_URL from Render environment first
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Parse mysql://user:pass@host:port/database
+    match = re.match(r'mysql://([^:]+):([^@]+)@([^:]+):(\d+)/([^?]+)', DATABASE_URL)
+    if match:
+        db = mysql.connector.connect(
+            host=match.group(3),
+            port=int(match.group(4)),
+            user=match.group(1),
+            password=match.group(2),
+            database=match.group(5)
+        )
+        print("✅ Connected to Aiven MySQL via DATABASE_URL")
+    else:
+        # Fallback to individual environment variables
+        db = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            port=os.environ.get('DB_PORT', 3306),
+            user=os.environ.get('DB_USER', 'root'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'trackmytrash')
+        )
+        print("✅ Connected via individual DB env vars")
+else:
+    # Local development
+    db = mysql.connector.connect(
+        host="localhost",
+        port="3306",
+        user="root",
+        password="",
+        database="trackmytrash"
+    )
+    print("✅ Connected to local MySQL")
+
 cursor = db.cursor(dictionary=True)
 
 # ========== SERVE FRONTEND FILES ==========
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-frontend_path = os.path.join(BASE_DIR, 'frontend')
-css_path = os.path.join(BASE_DIR, 'css')
-js_path = os.path.join(BASE_DIR, 'js')
-img_path = os.path.join(BASE_DIR, 'img')
+frontend_path = os.path.join(PROJECT_ROOT, 'frontend')
+css_path = os.path.join(PROJECT_ROOT, 'css')
+js_path = os.path.join(PROJECT_ROOT, 'js')
+img_path = os.path.join(PROJECT_ROOT, 'img')
 
 @app.route('/')
 def serve_home():
@@ -401,6 +432,7 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
+    # Check admin first
     cursor.execute("SELECT * FROM admins WHERE username = %s AND password = %s", (username, password))
     admin = cursor.fetchone()
     
@@ -418,6 +450,7 @@ def login():
             "username": admin['username']
         })
     
+    # Regular user login
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
     cursor.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, hashed_password))
     user = cursor.fetchone()
