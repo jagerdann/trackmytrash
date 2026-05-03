@@ -32,7 +32,11 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ========== DATABASE CONNECTION ==========
-# Try DATABASE_URL from Render environment first
+import os
+import mysql.connector
+import re
+
+# Get DATABASE_URL from environment variable
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
@@ -48,15 +52,8 @@ if DATABASE_URL:
         )
         print("✅ Connected to Aiven MySQL via DATABASE_URL")
     else:
-        # Fallback to individual environment variables
-        db = mysql.connector.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            port=os.environ.get('DB_PORT', 3306),
-            user=os.environ.get('DB_USER', 'root'),
-            password=os.environ.get('DB_PASSWORD', ''),
-            database=os.environ.get('DB_NAME', 'trackmytrash')
-        )
-        print("✅ Connected via individual DB env vars")
+        print("❌ Invalid DATABASE_URL format")
+        db = None
 else:
     # Local development
     db = mysql.connector.connect(
