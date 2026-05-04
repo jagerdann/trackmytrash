@@ -25,12 +25,13 @@
         <h1 id="adminTitle">ADMIN PANEL</h1>
         <h2 id="welcomeAdmin"></h2>
 
-        <!-- Users Section -->
+        <!-- USERS -->
         <div id="usersSection" class="admin-section">
             <div class="section-header">
                 <h2>MANAGE USERS</h2>
                 <button class="btn-add" onclick="showUserModal()">+ Add User</button>
             </div>
+
             <div class="table-container">
                 <table id="usersTable">
                     <thead>
@@ -50,12 +51,13 @@
             </div>
         </div>
 
-        <!-- Routes Section -->
-        <div id="routesSection" class="admin-section" style="display: none;">
+        <!-- ROUTES -->
+        <div id="routesSection" class="admin-section" style="display:none;">
             <div class="section-header">
                 <h2>MANAGE ROUTES</h2>
                 <button class="btn-add" onclick="showRouteModal()">+ Add Route</button>
             </div>
+
             <div class="table-container">
                 <table id="routesTable">
                     <thead>
@@ -75,16 +77,17 @@
                     <tbody id="routesTableBody">
                         <tr><td colspan="10">Loading routes...</td></tr>
                     </tbody>
-                </table> <!-- ✅ FIXED -->
+                </table>
             </div>
         </div>
 
-        <!-- Feedbacks Section -->
-        <div id="feedbacksSection" class="admin-section" style="display: none;">
+        <!-- FEEDBACKS -->
+        <div id="feedbacksSection" class="admin-section" style="display:none;">
             <div class="section-header">
                 <h2>USER FEEDBACKS</h2>
                 <button class="btn-add" onclick="exportFeedbacks()">📥 Export to CSV</button>
             </div>
+
             <div class="table-container">
                 <table id="feedbacksTable">
                     <thead>
@@ -110,119 +113,126 @@
 <script>
 const API_BASE_URL = 'https://trackmytrash.onrender.com';
 
-// INIT (NEW)
-function initPage() {
+function initPage(){
     checkAdminSession();
     showSection('users');
 }
 
-// Toggle menu
-function toggleMenu() {
+function toggleMenu(){
     document.getElementById("navLinks").classList.toggle("show");
 }
 
-// Show section
-function showSection(section) {
-    document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
-    document.getElementById('routesSection').style.display = section === 'routes' ? 'block' : 'none';
-    document.getElementById('feedbacksSection').style.display = section === 'feedbacks' ? 'block' : 'none';
+function showSection(section){
+    document.getElementById('usersSection').style.display = section==='users'?'block':'none';
+    document.getElementById('routesSection').style.display = section==='routes'?'block':'none';
+    document.getElementById('feedbacksSection').style.display = section==='feedbacks'?'block':'none';
 
-    if (section === 'users') loadUsers();
-    if (section === 'routes') loadRoutes();
-    if (section === 'feedbacks') loadFeedbacks();
+    if(section==='users') loadUsers();
+    if(section==='routes') loadRoutes();
+    if(section==='feedbacks') loadFeedbacks();
 }
 
-// Session
-async function checkAdminSession() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/check_session`, { credentials: 'include' });
+async function checkAdminSession(){
+    try{
+        const res = await fetch(`${API_BASE_URL}/api/check_session`,{credentials:'include'});
         const result = await res.json();
 
-        if (result.logged_in && result.is_admin) {
+        if(result.logged_in && result.is_admin){
             document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}!`;
-        } else {
+        }else{
             window.location.href = `${API_BASE_URL}/Login.html`;
         }
-    } catch {
+    }catch{
         window.location.href = `${API_BASE_URL}/Login.html`;
     }
 }
 
-// USERS
-async function loadUsers() {
-    const res = await fetch(`${API_BASE_URL}/api/admin/users`, { credentials: 'include' });
+/* USERS */
+async function loadUsers(){
+    const res = await fetch(`${API_BASE_URL}/api/admin/users`,{credentials:'include'});
     const data = await res.json();
     const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '';
+    tbody.innerHTML='';
 
-    data.users.forEach(user => {
+    data.users.forEach(user=>{
         const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${user.id}</td>
-            <td>${user.username}</td>
-            <td>${user.email}</td>
-            <td>${user.barangay || '-'}</td>
-            <td>${user.contact_number || '-'}</td>
-            <td>
-                <button onclick="editUser(${user.id})">Edit</button>
-                <button onclick="deleteUser(${user.id})">Delete</button>
-            </td>`;
+        row.innerHTML=`
+        <td>${user.id}</td>
+        <td>${user.username}</td>
+        <td>${user.email}</td>
+        <td>${user.barangay||'-'}</td>
+        <td>${user.contact_number||'-'}</td>
+        <td>
+            <button class="btn-edit" onclick="editUser(${user.id})">Edit</button>
+            <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+        </td>`;
     });
 }
 
-// ROUTES
-async function loadRoutes() {
-    const res = await fetch(`${API_BASE_URL}/api/admin/routes`, { credentials: 'include' });
+/* ROUTES */
+async function loadRoutes(){
+    const res = await fetch(`${API_BASE_URL}/api/admin/routes`,{credentials:'include'});
     const data = await res.json();
     const tbody = document.getElementById('routesTableBody');
-    tbody.innerHTML = '';
+    tbody.innerHTML='';
 
-    data.routes.forEach(route => {
+    data.routes.forEach(route=>{
         const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${route.id}</td>
-            <td>${route.stop_no}</td>
-            <td>${route.area}</td>
-            <td>${route.landmark || '-'}</td>
-            <td>${route.arrival_time}</td>
-            <td>${route.duration}</td>
-            <td>${route.departure_time}</td>
-            <td>${route.barangay}</td>
-            <td>${route.route_image ? `<img src="../img/${route.route_image}" width="40">` : '-'}</td>
-            <td>
-                <button onclick="editRoute(${route.id})">Edit</button>
-                <button onclick="deleteRoute(${route.id})">Delete</button>
-            </td>`;
+        row.innerHTML=`
+        <td>${route.id}</td>
+        <td>${route.stop_no}</td>
+        <td>${route.area}</td>
+        <td>${route.landmark||'-'}</td>
+        <td>${route.arrival_time}</td>
+        <td>${route.duration}</td>
+        <td>${route.departure_time}</td>
+        <td>${route.barangay}</td>
+        <td>${route.route_image?`<img src="../img/${route.route_image}" width="40">`:'-'}</td>
+        <td>
+            <button class="btn-edit" onclick="editRoute(${route.id})">Edit</button>
+            <button class="btn-delete" onclick="deleteRoute(${route.id})">Delete</button>
+        </td>`;
     });
 }
 
-// FEEDBACKS
-async function loadFeedbacks() {
-    const res = await fetch(`${API_BASE_URL}/api/admin/feedbacks`, { credentials: 'include' });
+/* FEEDBACKS */
+async function loadFeedbacks(){
+    const res = await fetch(`${API_BASE_URL}/api/admin/feedbacks`,{credentials:'include'});
     const data = await res.json();
     const tbody = document.getElementById('feedbacksTableBody');
-    tbody.innerHTML = '';
+    tbody.innerHTML='';
 
-    data.feedbacks.forEach(f => {
+    data.feedbacks.forEach(f=>{
         const row = tbody.insertRow();
-        row.innerHTML = `
-            <td>${f.id}</td>
-            <td>${f.name}</td>
-            <td>${f.email}</td>
-            <td>${f.barangay || '-'}</td>
-            <td>${f.feedback_type}</td>
-            <td>${f.message}</td>
-            <td>${new Date(f.created_at).toLocaleString()}</td>
-            <td><button onclick="deleteFeedback(${f.id})">Delete</button></td>`;
+        row.innerHTML=`
+        <td>${f.id}</td>
+        <td>${f.name}</td>
+        <td>${f.email}</td>
+        <td>${f.barangay||'-'}</td>
+        <td>${f.feedback_type}</td>
+        <td>${f.message}</td>
+        <td>${new Date(f.created_at).toLocaleString()}</td>
+        <td>
+            <button class="btn-delete" onclick="deleteFeedback(${f.id})">Delete</button>
+        </td>`;
     });
 }
 
-// DELETE
-async function deleteUser(id){ await fetch(`${API_BASE_URL}/api/admin/users/${id}`,{method:'DELETE',credentials:'include'}); loadUsers(); }
-async function deleteRoute(id){ await fetch(`${API_BASE_URL}/api/admin/routes/${id}`,{method:'DELETE',credentials:'include'}); loadRoutes(); }
-async function deleteFeedback(id){ await fetch(`${API_BASE_URL}/api/admin/feedbacks/${id}`,{method:'DELETE',credentials:'include'}); loadFeedbacks(); }
+/* DELETE */
+async function deleteUser(id){
+    await fetch(`${API_BASE_URL}/api/admin/users/${id}`,{method:'DELETE',credentials:'include'});
+    loadUsers();
+}
+async function deleteRoute(id){
+    await fetch(`${API_BASE_URL}/api/admin/routes/${id}`,{method:'DELETE',credentials:'include'});
+    loadRoutes();
+}
+async function deleteFeedback(id){
+    await fetch(`${API_BASE_URL}/api/admin/feedbacks/${id}`,{method:'DELETE',credentials:'include'});
+    loadFeedbacks();
+}
 
-// LOGOUT
+/* LOGOUT */
 function logout(){
     window.location.href = `${API_BASE_URL}/Login.html`;
 }
