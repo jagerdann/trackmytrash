@@ -7,8 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
     <title>Admin Panel - Track My Trash</title>
 </head>
-
-<body onload="initPage()">
+<body onload="checkAdminSession()">
 
     <div id="navbar">
         <img src="../img/logo.png" alt="Logo" id="logo">
@@ -22,16 +21,15 @@
     </div>
 
     <div class="admin-container">
-        <h1 id="adminTitle">ADMIN PANEL TRACK MY TRASH</h1>
+        <h1 id="adminTitle">ADMIN PANEL</h1>
         <h2 id="welcomeAdmin"></h2>
 
-        <!-- USERS -->
+        <!-- Users Section -->
         <div id="usersSection" class="admin-section">
             <div class="section-header">
                 <h2>MANAGE USERS</h2>
                 <button class="btn-add" onclick="showUserModal()">+ Add User</button>
             </div>
-
             <div class="table-container">
                 <table id="usersTable">
                     <thead>
@@ -51,13 +49,12 @@
             </div>
         </div>
 
-        <!-- ROUTES -->
-        <div id="routesSection" class="admin-section" style="display:none;">
+        <!-- Routes Section -->
+        <div id="routesSection" class="admin-section" style="display: none;">
             <div class="section-header">
                 <h2>MANAGE ROUTES</h2>
                 <button class="btn-add" onclick="showRouteModal()">+ Add Route</button>
             </div>
-
             <div class="table-container">
                 <table id="routesTable">
                     <thead>
@@ -81,13 +78,12 @@
             </div>
         </div>
 
-        <!-- FEEDBACKS -->
-        <div id="feedbacksSection" class="admin-section" style="display:none;">
+        <!-- Feedbacks Section -->
+        <div id="feedbacksSection" class="admin-section" style="display: none;">
             <div class="section-header">
                 <h2>USER FEEDBACKS</h2>
                 <button class="btn-add" onclick="exportFeedbacks()">📥 Export to CSV</button>
             </div>
-
             <div class="table-container">
                 <table id="feedbacksTable">
                     <thead>
@@ -110,133 +106,656 @@
         </div>
     </div>
 
-<script>
-const API_BASE_URL = 'https://trackmytrash.onrender.com';
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Add User</h3>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="userUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" placeholder="Leave blank to keep current">
+                </div>
+                <div class="form-group">
+                    <label>Barangay</label>
+                    <input type="text" id="userBarangay">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" id="userContact">
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">Save</button>
+                    <button type="button" class="btn-cancel" onclick="closeUserModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-function initPage(){
-    checkAdminSession();
-    showSection('users');
-}
+    <!-- Route Modal -->
+    <div id="routeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="routeModalTitle">Add Route</h3>
+                <span class="close" onclick="closeRouteModal()">&times;</span>
+            </div>
+            <form id="routeForm" enctype="multipart/form-data">
+                <input type="hidden" id="routeId">
+                <div class="form-group">
+                    <label>Stop No. (Auto-generated)</label>
+                    <input type="number" id="routeStopNo" required readonly style="background: #e8e8e8;">
+                </div>
+                <div class="form-group">
+                    <label>Area</label>
+                    <input type="text" id="routeArea" required>
+                </div>
+                <div class="form-group">
+                    <label>Landmark</label>
+                    <input type="text" id="routeLandmark">
+                </div>
+                <div class="form-group">
+                    <label>Arrival Time</label>
+                    <input type="text" id="routeArrivalTime" placeholder="e.g., 6:00 AM" required>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes)</label>
+                    <input type="number" id="routeDuration" placeholder="e.g., 25" required>
+                </div>
+                <div class="form-group">
+                    <label>Departure Time (Auto-calculated)</label>
+                    <input type="text" id="routeDepartureTime" readonly style="background: #e8e8e8;">
+                </div>
+                <div class="form-group">
+                    <label>Barangay</label>
+                    <input type="text" id="routeBarangay" required>
+                </div>
+                <div class="form-group">
+                    <label>Route Image <span style="color: red;">*</span></label>
+                    <input type="file" id="routeImageFile" accept="image/png, image/jpg, image/jpeg, image/gif">
+                    <small style="color: gray;">Upload PNG, JPG, or JPEG file (leave empty to keep current image)</small>
+                    <div id="imagePreview" style="margin-top: 10px;"></div>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-save">Save</button>
+                    <button type="button" class="btn-cancel" onclick="closeRouteModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-function toggleMenu(){
-    document.getElementById("navLinks").classList.toggle("show");
-}
-
-function showSection(section){
-    document.getElementById('usersSection').style.display = section==='users'?'block':'none';
-    document.getElementById('routesSection').style.display = section==='routes'?'block':'none';
-    document.getElementById('feedbacksSection').style.display = section==='feedbacks'?'block':'none';
-
-    if(section==='users') loadUsers();
-    if(section==='routes') loadRoutes();
-    if(section==='feedbacks') loadFeedbacks();
-}
-
-async function checkAdminSession(){
-    try{
-        const res = await fetch(`${API_BASE_URL}/api/check_session`,{credentials:'include'});
-        const result = await res.json();
-
-        if(result.logged_in && result.is_admin){
-            document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}!`;
-        }else{
-            window.location.href = `${API_BASE_URL}/Login.html`;
+    <script>
+        // API Base URL - change this to your Render URL
+        const API_BASE_URL = 'https://trackmytrash.onrender.com';
+        
+        // Toggle mobile menu
+        function toggleMenu() {
+            document.getElementById("navLinks").classList.toggle("show");
         }
-    }catch{
-        window.location.href = `${API_BASE_URL}/Login.html`;
-    }
-}
 
-/* USERS */
-async function loadUsers(){
-    const res = await fetch(`${API_BASE_URL}/api/admin/users`,{credentials:'include'});
-    const data = await res.json();
-    const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML='';
+        // Show section
+        function showSection(section) {
+            document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
+            document.getElementById('routesSection').style.display = section === 'routes' ? 'block' : 'none';
+            document.getElementById('feedbacksSection').style.display = section === 'feedbacks' ? 'block' : 'none';
+            
+            if (section === 'users') loadUsers();
+            if (section === 'routes') loadRoutes();
+            if (section === 'feedbacks') loadFeedbacks();
+        }
 
-    data.users.forEach(user=>{
-        const row = tbody.insertRow();
-        row.innerHTML=`
-        <td>${user.id}</td>
-        <td>${user.username}</td>
-        <td>${user.email}</td>
-        <td>${user.barangay||'-'}</td>
-        <td>${user.contact_number||'-'}</td>
-        <td>
-            <button class="btn-edit" onclick="editUser(${user.id})">Edit</button>
-            <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
-        </td>`;
-    });
-}
+        // Check admin session
+        async function checkAdminSession() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/check_session`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.logged_in && result.is_admin) {
+                    document.getElementById('welcomeAdmin').innerHTML = `Welcome, ${result.username}!`;
+                    loadUsers();
+                } else {
+                    window.location.href = `${API_BASE_URL}/Login.html`;
+                }
+            } catch(error) {
+                console.error('Session check failed:', error);
+                window.location.href = `${API_BASE_URL}/Login.html`;
+            }
+        }
 
-/* ROUTES */
-async function loadRoutes(){
-    const res = await fetch(`${API_BASE_URL}/api/admin/routes`,{credentials:'include'});
-    const data = await res.json();
-    const tbody = document.getElementById('routesTableBody');
-    tbody.innerHTML='';
+        // Load users
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = '';
+                    
+                    data.users.forEach(user => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = user.id;
+                        row.insertCell(1).textContent = user.username;
+                        row.insertCell(2).textContent = user.email;
+                        row.insertCell(3).textContent = user.barangay || '-';
+                        row.insertCell(4).textContent = user.contact_number || '-';
+                        const actionsCell = row.insertCell(5);
+                        actionsCell.innerHTML = `
+                            <button class="btn-edit" onclick="editUser(${user.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteUser(${user.id})">Delete</button>
+                        `;
+                    });
+                }
+            } catch(error) {
+                console.error('Failed to load users:', error);
+            }
+        }
 
-    data.routes.forEach(route=>{
-        const row = tbody.insertRow();
-        row.innerHTML=`
-        <td>${route.id}</td>
-        <td>${route.stop_no}</td>
-        <td>${route.area}</td>
-        <td>${route.landmark||'-'}</td>
-        <td>${route.arrival_time}</td>
-        <td>${route.duration}</td>
-        <td>${route.departure_time}</td>
-        <td>${route.barangay}</td>
-        <td>${route.route_image?`<img src="../img/${route.route_image}" width="40">`:'-'}</td>
-        <td>
-            <button class="btn-edit" onclick="editRoute(${route.id})">Edit</button>
-            <button class="btn-delete" onclick="deleteRoute(${route.id})">Delete</button>
-        </td>`;
-    });
-}
+        // Load routes
+        async function loadRoutes() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('routesTableBody');
+                    tbody.innerHTML = '';
+                    
+                    data.routes.forEach(route => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = route.id;
+                        row.insertCell(1).textContent = route.stop_no;
+                        row.insertCell(2).textContent = route.area;
+                        row.insertCell(3).textContent = route.landmark || '-';
+                        row.insertCell(4).textContent = route.arrival_time;
+                        row.insertCell(5).textContent = route.duration;
+                        row.insertCell(6).textContent = route.departure_time;
+                        row.insertCell(7).textContent = route.barangay;
+                        row.insertCell(8).innerHTML = route.route_image ? `<img src="../img/${route.route_image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">` : '-';
+                        const actionsCell = row.insertCell(9);
+                        actionsCell.innerHTML = `
+                            <button class="btn-edit" onclick="editRoute(${route.id})">Edit</button>
+                            <button class="btn-delete" onclick="deleteRoute(${route.id})">Delete</button>
+                        `;
+                    });
+                }
+            } catch(error) {
+                console.error('Failed to load routes:', error);
+            }
+        }
 
-/* FEEDBACKS */
-async function loadFeedbacks(){
-    const res = await fetch(`${API_BASE_URL}/api/admin/feedbacks`,{credentials:'include'});
-    const data = await res.json();
-    const tbody = document.getElementById('feedbacksTableBody');
-    tbody.innerHTML='';
+        // ========== FEEDBACKS FUNCTIONS ==========
 
-    data.feedbacks.forEach(f=>{
-        const row = tbody.insertRow();
-        row.innerHTML=`
-        <td>${f.id}</td>
-        <td>${f.name}</td>
-        <td>${f.email}</td>
-        <td>${f.barangay||'-'}</td>
-        <td>${f.feedback_type}</td>
-        <td>${f.message}</td>
-        <td>${new Date(f.created_at).toLocaleString()}</td>
-        <td>
-            <button class="btn-delete" onclick="deleteFeedback(${f.id})">Delete</button>
-        </td>`;
-    });
-}
+        // Load feedbacks
+        async function loadFeedbacks() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('feedbacksTableBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.feedbacks.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No feedbacks yet</td></tr>';
+                        return;
+                    }
+                    
+                    data.feedbacks.forEach(feedback => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = feedback.id;
+                        row.insertCell(1).textContent = feedback.name;
+                        row.insertCell(2).textContent = feedback.email;
+                        row.insertCell(3).textContent = feedback.barangay || '-';
+                        
+                        // Feedback type with badge styling
+                        const typeCell = row.insertCell(4);
+                        let badgeClass = '';
+                        const type = (feedback.feedback_type || 'general').toLowerCase();
+                        switch(type) {
+                            case 'complaint': badgeClass = 'complaint'; break;
+                            case 'suggestion': badgeClass = 'suggestion'; break;
+                            case 'question': badgeClass = 'question'; break;
+                            case 'praise': 
+                            case 'compliment': badgeClass = 'praise'; break;
+                            default: badgeClass = 'general';
+                        }
+                        typeCell.innerHTML = `<span class="feedback-badge ${badgeClass}">${feedback.feedback_type || 'General'}</span>`;
+                        
+                        // Message with truncation for long messages
+                        let message = feedback.message || '-';
+                        if (message.length > 100) {
+                            message = message.substring(0, 100) + '...';
+                        }
+                        row.insertCell(5).textContent = message;
+                        
+                        const date = new Date(feedback.created_at);
+                        row.insertCell(6).textContent = date.toLocaleString('en-PH', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        const actionsCell = row.insertCell(7);
+                        actionsCell.innerHTML = `<button class="btn-delete" onclick="deleteFeedback(${feedback.id})">Delete</button>`;
+                    });
+                } else {
+                    document.getElementById('feedbacksTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center;">Failed to load feedbacks</td></tr>';
+                }
+            } catch(error) {
+                console.error('Failed to load feedbacks:', error);
+                document.getElementById('feedbacksTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center;">Error loading feedbacks</td></tr>';
+            }
+        }
 
-/* DELETE */
-async function deleteUser(id){
-    await fetch(`${API_BASE_URL}/api/admin/users/${id}`,{method:'DELETE',credentials:'include'});
-    loadUsers();
-}
-async function deleteRoute(id){
-    await fetch(`${API_BASE_URL}/api/admin/routes/${id}`,{method:'DELETE',credentials:'include'});
-    loadRoutes();
-}
-async function deleteFeedback(id){
-    await fetch(`${API_BASE_URL}/api/admin/feedbacks/${id}`,{method:'DELETE',credentials:'include'});
-    loadFeedbacks();
-}
+        // Delete feedback
+        async function deleteFeedback(id) {
+            if (confirm('Are you sure you want to delete this feedback?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadFeedbacks();
+                } catch(error) {
+                    alert('Failed to delete feedback');
+                }
+            }
+        }
 
-/* LOGOUT */
-function logout(){
-    window.location.href = `${API_BASE_URL}/Login.html`;
-}
-</script>
+        // Export feedbacks to CSV
+        async function exportFeedbacks() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/feedbacks`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success && data.feedbacks.length > 0) {
+                    const headers = ['ID', 'Name', 'Email', 'Barangay', 'Feedback Type', 'Message', 'Date Submitted'];
+                    const rows = data.feedbacks.map(f => [
+                        f.id,
+                        `"${(f.name || '').replace(/"/g, '""')}"`,
+                        f.email,
+                        f.barangay || '',
+                        f.feedback_type || '',
+                        `"${(f.message || '').replace(/"/g, '""')}"`,
+                        new Date(f.created_at).toLocaleString()
+                    ]);
+                    
+                    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `feedbacks_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    alert('Feedbacks exported successfully!');
+                } else {
+                    alert('No feedbacks to export');
+                }
+            } catch(error) {
+                alert('Failed to export feedbacks');
+            }
+        }
 
+        // Get next stop number
+        async function getNextStopNumber() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes/next_stop`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                return data.next_stop;
+            } catch(error) {
+                console.error('Failed to get next stop number:', error);
+                return 1;
+            }
+        }
+
+        // Auto-calculate departure time
+        function calculateDepartureTime() {
+            const arrivalTime = document.getElementById('routeArrivalTime').value;
+            const duration = document.getElementById('routeDuration').value;
+            
+            if (arrivalTime && duration) {
+                const match = arrivalTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                if (match) {
+                    let hour = parseInt(match[1]);
+                    const minute = parseInt(match[2]);
+                    const period = match[3].toUpperCase();
+                    const durationMinutes = parseInt(duration);
+                    
+                    if (!isNaN(durationMinutes)) {
+                        if (period === 'PM' && hour !== 12) hour += 12;
+                        if (period === 'AM' && hour === 12) hour = 0;
+                        
+                        let totalMinutes = hour * 60 + minute + durationMinutes;
+                        let newHour = Math.floor(totalMinutes / 60);
+                        let newMinute = totalMinutes % 60;
+                        let newPeriod = newHour >= 12 ? 'PM' : 'AM';
+                        let newHour12 = newHour % 12;
+                        if (newHour12 === 0) newHour12 = 12;
+                        
+                        const departureTime = `${newHour12}:${newMinute.toString().padStart(2, '0')} ${newPeriod}`;
+                        document.getElementById('routeDepartureTime').value = departureTime;
+                    }
+                }
+            }
+        }
+
+        // Image preview
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #0e5125;">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // User CRUD
+        async function editUser(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('userId').value = data.user.id;
+                    document.getElementById('userUsername').value = data.user.username;
+                    document.getElementById('userEmail').value = data.user.email;
+                    document.getElementById('userBarangay').value = data.user.barangay || '';
+                    document.getElementById('userContact').value = data.user.contact_number || '';
+                    document.getElementById('userPassword').value = '';
+                    document.getElementById('userModalTitle').textContent = 'Edit User';
+                    document.getElementById('userModal').style.display = 'flex';
+                }
+            } catch(error) {
+                alert('Failed to load user data');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadUsers();
+                } catch(error) {
+                    alert('Failed to delete user');
+                }
+            }
+        }
+
+        function showUserModal() {
+            document.getElementById('userId').value = '';
+            document.getElementById('userUsername').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userPassword').value = '';
+            document.getElementById('userBarangay').value = '';
+            document.getElementById('userContact').value = '';
+            document.getElementById('userModalTitle').textContent = 'Add User';
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        // Route CRUD
+        async function editRoute(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/routes/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('routeId').value = data.route.id;
+                    document.getElementById('routeStopNo').value = data.route.stop_no;
+                    document.getElementById('routeStopNo').readOnly = false;
+                    document.getElementById('routeArea').value = data.route.area;
+                    document.getElementById('routeLandmark').value = data.route.landmark || '';
+                    document.getElementById('routeArrivalTime').value = data.route.arrival_time;
+                    document.getElementById('routeDuration').value = data.route.duration;
+                    document.getElementById('routeDepartureTime').value = data.route.departure_time;
+                    document.getElementById('routeBarangay').value = data.route.barangay;
+                    document.getElementById('routeModalTitle').textContent = 'Edit Route';
+                    document.getElementById('routeModal').style.display = 'flex';
+                    
+                    if (data.route.route_image) {
+                        const preview = document.getElementById('imagePreview');
+                        preview.innerHTML = `<img src="../img/${data.route.route_image}" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #0e5125;"><br><small>Current image</small>`;
+                    }
+                }
+            } catch(error) {
+                alert('Failed to load route data');
+            }
+        }
+
+        async function deleteRoute(id) {
+            if (confirm('Are you sure you want to delete this route? This will affect stop numbering!')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/admin/routes/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    alert(data.message);
+                    loadRoutes();
+                } catch(error) {
+                    alert('Failed to delete route');
+                }
+            }
+        }
+
+        async function showRouteModal() {
+            document.getElementById('routeId').value = '';
+            document.getElementById('routeArea').value = '';
+            document.getElementById('routeLandmark').value = '';
+            document.getElementById('routeArrivalTime').value = '';
+            document.getElementById('routeDuration').value = '';
+            document.getElementById('routeDepartureTime').value = '';
+            document.getElementById('routeBarangay').value = '';
+            document.getElementById('routeImageFile').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('routeModalTitle').textContent = 'Add Route';
+            
+            const nextStop = await getNextStopNumber();
+            document.getElementById('routeStopNo').value = nextStop;
+            document.getElementById('routeStopNo').readOnly = true;
+            
+            document.getElementById('routeModal').style.display = 'flex';
+        }
+
+        function closeRouteModal() {
+            document.getElementById('routeModal').style.display = 'none';
+        }
+
+        // Form submissions
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('userId').value;
+            const data = {
+                username: document.getElementById('userUsername').value,
+                email: document.getElementById('userEmail').value,
+                barangay: document.getElementById('userBarangay').value,
+                contact_number: document.getElementById('userContact').value
+            };
+            
+            if (document.getElementById('userPassword').value) {
+                data.password = document.getElementById('userPassword').value;
+            }
+            
+            const url = id ? `${API_BASE_URL}/api/admin/users/${id}` : `${API_BASE_URL}/api/admin/users`;
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message);
+                closeUserModal();
+                loadUsers();
+            } catch(error) {
+                alert('Failed to save user');
+            }
+        });
+
+        document.getElementById('routeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('routeId').value;
+            const imageFile = document.getElementById('routeImageFile').files[0];
+            
+            const arrivalTime = document.getElementById('routeArrivalTime').value;
+            const duration = document.getElementById('routeDuration').value;
+            let departureTime = document.getElementById('routeDepartureTime').value;
+            
+            if (arrivalTime && duration) {
+                const match = arrivalTime.match(/(\d+):(\d+)\s*(AM|PM)/i);
+                if (match) {
+                    let hour = parseInt(match[1]);
+                    const minute = parseInt(match[2]);
+                    const period = match[3].toUpperCase();
+                    const durationMinutes = parseInt(duration);
+                    
+                    if (!isNaN(durationMinutes)) {
+                        if (period === 'PM' && hour !== 12) hour += 12;
+                        if (period === 'AM' && hour === 12) hour = 0;
+                        
+                        let totalMinutes = hour * 60 + minute + durationMinutes;
+                        let newHour = Math.floor(totalMinutes / 60);
+                        let newMinute = totalMinutes % 60;
+                        let newPeriod = newHour >= 12 ? 'PM' : 'AM';
+                        let newHour12 = newHour % 12;
+                        if (newHour12 === 0) newHour12 = 12;
+                        
+                        departureTime = `${newHour12}:${newMinute.toString().padStart(2, '0')} ${newPeriod}`;
+                        document.getElementById('routeDepartureTime').value = departureTime;
+                    }
+                }
+            }
+            
+            const data = {
+                stop_no: parseInt(document.getElementById('routeStopNo').value),
+                area: document.getElementById('routeArea').value,
+                landmark: document.getElementById('routeLandmark').value,
+                arrival_time: document.getElementById('routeArrivalTime').value,
+                duration: document.getElementById('routeDuration').value,
+                departure_time: departureTime,
+                barangay: document.getElementById('routeBarangay').value
+            };
+            
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('image', imageFile);
+                
+                try {
+                    const uploadResponse = await fetch(`${API_BASE_URL}/api/admin/upload_route_image`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    const uploadResult = await uploadResponse.json();
+                    
+                    if (uploadResult.success) {
+                        data.route_image = uploadResult.filename;
+                    } else {
+                        alert(uploadResult.message);
+                        return;
+                    }
+                } catch(error) {
+                    alert('Failed to upload image: ' + error);
+                    return;
+                }
+            }
+            
+            const url = id ? `${API_BASE_URL}/api/admin/routes/${id}` : `${API_BASE_URL}/api/admin/routes`;
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                alert(result.message);
+                closeRouteModal();
+                loadRoutes();
+            } catch(error) {
+                alert('Failed to save route: ' + error);
+            }
+        });
+
+        // Add event listeners
+        document.getElementById('routeArrivalTime').addEventListener('input', calculateDepartureTime);
+        document.getElementById('routeDuration').addEventListener('input', calculateDepartureTime);
+        document.getElementById('routeImageFile').addEventListener('change', function() {
+            previewImage(this);
+        });
+
+        // Logout
+        async function logout() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                alert(result.message);
+                window.location.href = `${API_BASE_URL}/Login.html`;
+            } catch(error) {
+                alert('Logout failed');
+                window.location.href = `${API_BASE_URL}/Login.html`;
+            }
+        }
+    </script>
 </body>
 </html>
